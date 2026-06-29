@@ -349,7 +349,6 @@
         });
 
         document.getElementById('btnPerformSaque').addEventListener('click', async () => {
-            // Mapeamento corrigido para ler do ID "saque-amount"
             const valorSaque = parseFloat(document.getElementById('saque-amount').value);
             const chavePix = document.getElementById('pix-key').value.trim();
             const tipoPix = hiddenInput.value;
@@ -371,23 +370,33 @@
             Swal.fire({ title: 'Processando...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0c0d12', color: '#fff' });
 
             try {
+                // Cálculo das taxas igualzinho ao código antigo que seu painel admin lê
+                const taxa = valorSaque * 0.10;
+                const valorLiquido = valorSaque - taxa;
+                const dataHoje = new Date().toLocaleDateString('pt-BR');
+
+                // 1. Deduz do saldo do usuário
                 const userRef = doc(db, "usuarios", uidAtual);
                 await updateDoc(userRef, {
                     saldoLucro: increment(-valorSaque)
                 });
 
-                // Enviando o valor correto capturado e forçando o Timestamp do Firestore
+                // 2. Envia na coleção global com os mesmos mapeamentos do arquivo desatualizado (saque 7)
                 await addDoc(collection(db, "saques"), {
                     userId: uidAtual,
                     nomeUsuario: userDataGlobal?.nome || "Usuário",
                     emailUsuario: userDataGlobal?.email || "",
-                    valor: valorSaque, // Adicionado perfeitamente
+                    valorSolicitado: Number(valorSaque), // Seu painel lê este nome
+                    taxaCobrada: taxa,                   // Seu painel lê este nome
+                    valorReceber: valorLiquido,          // Seu painel lê este nome
                     chavePix: chavePix,
-                    tipoPix: tipoPix,
+                    pixType: tipoPix,
                     status: "pendente", 
-                    dataSolicitacao: Timestamp.now() // Gravando a data e horário corretos
+                    data: dataHoje,                      // Data em formato String (ex: "29/06/2026")
+                    timestamp: Timestamp.now()           // Objeto nativo de Timestamp
                 });
 
+                // 3. Adiciona ao extrato do histórico do usuário
                 await addDoc(collection(db, "historico"), {
                     userId: uidAtual,
                     valor: -valorSaque,
@@ -396,7 +405,7 @@
                     data: Timestamp.now()
                 });
 
-                await Swal.fire({ icon: 'success', title: 'Sucesso!', text: 'Solicitação de saque enviada para o administrador!', timer: 2500, showConfirmButton: false, background: '#0c0d12', color: '#fff' });
+                await Swal.fire({ icon: 'success', title: 'Sucesso!', text: 'Solicitação de saque enviada!', timer: 2500, showConfirmButton: false, background: '#0c0d12', color: '#fff' });
                 window.location.href = "home.html";
 
             } catch (error) {
@@ -406,7 +415,7 @@
                     await updateDoc(userRef, { saldoLucro: increment(valorSaque) });
                 } catch(err) { console.error(err); }
 
-                Swal.fire({ icon: 'error', title: 'Erro no Saque', text: 'Ocorreu um erro ao processar. Tente novamente.', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
+                Swal.fire({ icon: 'error', title: 'Erro técnico', text: 'Ocorreu um erro ao processar. Tente novamente.', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
                 btn.disabled = false;
             }
         });
