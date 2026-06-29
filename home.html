@@ -649,77 +649,90 @@
             }
         });
 
-        function atualizarInterfaceCheckin(userData) {
-            const hoje = getHojeString();
-            const ontem = getOntemString();
-            
-            let streak = userData.streakCheckin || 0;
-            let ultimoCheckin = userData.ultimoCheckin || "";
+function atualizarInterfaceCheckin(userData) {
+    const hoje = getHojeString();
+    const ontem = getOntemString();
+    let streak = userData.streakCheckin || 0;
+    let ultimoCheckin = userData.ultimoCheckin || "";
 
-            if (ultimoCheckin !== hoje && ultimoCheckin !== ontem && streak > 0) {
-                streak = 0; 
-            }
+    if (ultimoCheckin !== hoje && ultimoCheckin !== ontem && streak > 0) {
+        streak = 0;
+    }
 
-            const isFezHoje = (ultimoCheckin === hoje);
-            const proximoStreak = isFezHoje ? streak : streak + 1;
-            const proximaRecompensa = proximoStreak * 0.50; 
+    const isFezHoje = (ultimoCheckin === hoje);
+    
+    // Altera aqui para o prêmio ser SEMPRE R$ 0,50 centavos fixos
+    const proximaRecompensa = 0.50; 
 
-            document.getElementById('badge-streak').innerHTML = `<i class="fas fa-fire"></i> ${streak} Dias`;
-            
-            const containerDias = document.getElementById('checkin-days-container');
-            let htmlDias = '';
-            
-            const diaVisualAtual = (streak % 7 === 0 && streak > 0 && isFezHoje) ? 7 : streak % 7; 
+    document.getElementById('badge-streak').innerHTML = `<i class="fas fa-fire"></i> ${streak} Dias`;
+    const containerDias = document.getElementById('checkin-days-container');
+    let htmlDias = '';
+    const diaVisualAtual = (streak % 7 === 0 && streak > 0 && isFezHoje) ? 7 : streak % 7;
 
-            for (let i = 1; i <= 7; i++) {
-                let statusClass = '';
-                if (i <= diaVisualAtual) {
-                    statusClass = 'active'; 
-                } else if (!isFezHoje && i === diaVisualAtual + 1) {
-                    statusClass = 'pending'; 
-                }
-                htmlDias += `
-                <div class="day-box ${statusClass}">
-                    <i class="fas fa-fire"></i>
-                    <span>${i}</span>
-                </div>`;
-            }
-            containerDias.innerHTML = htmlDias;
-
-            const btn = document.getElementById('btn-checkin');
-            if (isFezHoje) {
-                btn.disabled = true;
-                btn.innerHTML = `<i class="fas fa-check-circle"></i> Coletado Hoje`;
-                btn.onclick = null;
-            } else {
-                btn.disabled = false;
-                btn.innerHTML = `🔥 Resgatar + R$ ${proximaRecompensa.toFixed(2)}`;
-                
-                btn.onclick = async () => {
-                    btn.disabled = true;
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
-                    try {
-                        const uid = auth.currentUser.uid;
-                        await updateDoc(doc(db, "usuarios", uid), {
-                            streakCheckin: proximoStreak,
-                            ultimoCheckin: hoje,
-                            saldoLucro: increment(proximaRecompensa),
-                            totalGanhos: increment(proximaRecompensa)
-                        });
-                        await addDoc(collection(db, "historico"), {
-                            userId: uid, valor: proximaRecompensa, tipo: `Presença Diária (${proximoStreak}º dia)`, data: Timestamp.now()
-                        });
-                        Swal.fire({ title: 'Recompensa Diária!', html: `Você resgatou <b style="color:var(--green-success)">R$ ${proximaRecompensa.toFixed(2)}</b> pelo seu <b>${proximoStreak}º</b> dia consecutivo conosco!`, icon: 'success', background: '#060b19', color: '#fff', confirmButtonColor: '#ff5722' });
-                    } catch(err) {
-                        console.error(err);
-                        Swal.fire('Erro', 'Falha ao processar presença.', 'error');
-                        btn.disabled = false;
-                        btn.innerHTML = `🔥 Resgatar + R$ ${proximaRecompensa.toFixed(2)}`;
-                    }
-                };
-            }
+    for (let i = 1; i <= 7; i++) {
+        let statusClass = '';
+        if (i <= diaVisualAtual) {
+            statusClass = 'active';
+        } else if (!isFezHoje && i === diaVisualAtual + 1) {
+            statusClass = 'pending';
         }
+        htmlDias += `
+         <div class="day-box ${statusClass}">
+             <i class="fas fa-fire"></i>
+             <span>${i}</span>
+         </div>`;
+    }
+    containerDias.innerHTML = htmlDias;
 
+    const btn = document.getElementById('btn-checkin');
+    if (isFezHoje) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-check-circle"></i> Coletado Hoje`;
+        btn.onclick = null;
+    } else {
+        btn.disabled = false;
+        // Mostra visualmente o valor correto de R$ 0,50 no botão
+        btn.innerHTML = `<i class="fas fa-gift"></i> COLETAR RECOMPENSA (R$ 0,50)`; 
+        
+        btn.onclick = async () => {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+            try {
+                const uid = auth.currentUser.uid;
+                const novoStreak = streak + 1;
+
+                await updateDoc(doc(db, "usuarios", uid), {
+                    ultimoCheckin: hoje,
+                    streakCheckin: novoStreak,
+                    // Garante que o acréscimo no saldo seja exatamente R$ 0,50 centavos
+                    saldoLucro: increment(0.50), 
+                    totalGanhos: increment(0.50)
+                });
+
+                await addDoc(collection(db, "historico"), {
+                    userId: uid,
+                    valor: 0.50,
+                    tipo: 'Presença Diária',
+                    data: Timestamp.now()
+                });
+
+                Swal.fire({
+                    title: 'Check-in Realizado!',
+                    text: 'Você recebeu R$ 0,50 de saldo!',
+                    icon: 'success',
+                    background: '#060b19',
+                    color: '#fff',
+                    confirmButtonColor: '#ffd700'
+                });
+
+            } catch (e) {
+                console.error(e);
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-gift"></i> COLETAR RECOMPENSA (R$ 0,50)`;
+            }
+        };
+    }
+}
         function atualizarMissoes(userData, totalInvestido, fezInvestimentoHoje) {
             const hoje = getHojeString();
             const isFezHoje = (userData.ultimoCheckin === hoje);
