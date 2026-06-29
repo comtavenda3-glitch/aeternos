@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coleção - Aeterna Watches</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(180deg, #060b19 0%, #020408 100%);
+            --card-glass: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.07);
+            --gold: #ffd700;
+            --gold-gradient: linear-gradient(135deg, #ffd700 0%, #eab308 100%);
+            --gold-glow: rgba(255, 215, 0, 0.25);
+            --text-muted: #8a99ad;
+            --green-profit: #00e676;
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Inter', sans-serif; 
+            outline: none !important; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body { 
+            background: var(--bg-gradient); 
+            color: white; 
+            padding: 25px 20px; 
+            padding-bottom: 120px; 
+            min-height: 100vh; 
+            overflow-x: hidden;
+        }
+
+        /* TÍTULO DA PÁGINA PREMIUM */
+        .header-section { 
+            margin: 15px 5px 25px 5px; 
+        }
+        .header-section h2 { 
+            font-size: 1.6rem; 
+            font-weight: 800; 
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+        }
+        .header-section h2 span { 
+            color: var(--gold); 
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); 
+        }
+        .header-section p { 
+            font-size: 0.8rem; 
+            color: var(--text-muted); 
+            margin-top: 4px; 
+            line-height: 1.4;
+        }
+
+        /* BALANÇO FINTECH GLASSMORPHISM */
+        .account-balance-card {
+            background: var(--card-glass);
+            border-radius: 24px;
+            padding: 22px 25px;
+            margin-bottom: 20px;
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        .account-balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 180px;
+            height: 180px;
+            background: rgba(255, 215, 0, 0.08);
+            filter: blur(45px);
+            border-radius: 50%;
+        }
+        .account-balance-card small { 
+            color: var(--text-muted); 
+            font-size: 0.68rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.6px; 
+            display: block;
+            font-weight: 600;
+        }
+        .account-balance-card .balance-value { 
+            font-size: 1.75rem; 
+            font-weight: 800; 
+            color: #fff; 
+            margin-top: 5px; 
+            letter-spacing: -0.5px;
+        }
+
+        /* SIMULADOR DE INVESTIMENTOS INTERATIVO */
+        .simulator-card {
+            background: rgba(255, 215, 0, 0.02);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 24px;
+            padding: 22px 25px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.02);
+        }
+        .simulator-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .simulator-header h4 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gold);
+            font-weight: 700;
+        }
+        .slider-container {
+            position: relative;
+            margin: 25px 0 15px 0;
+        }
+        .range-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 7px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+        }
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--gold);
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--gold);
+            transition: transform 0.1s ease;
+        }
+        .range-slider::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+        }
+        .simulated-value-display {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+        .simulated-value-display small {
+            font-size: 1rem;
+            color: var(--gold);
+            margin-right: 5px;
+        }
+        .simulator-results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .sim-result-box {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.03);
+            padding: 12px;
+            border-radius: 14px;
+            text-align: center;
+        }
+        .sim-result-box span {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 3px;
+            font-weight: 600;
+        }
+        .sim-result-box strong {
+            font-size: 0.95rem;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        /* SELETOR DE ABAS PREMIUM CHIPS */
+        .tier-navigation-bar {
+            display: flex;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 6px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            gap: 6px;
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(5px);
+        }
+        .tier-tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 12px 2px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .tier-tab-btn.active {
+            background: rgba(255, 215, 0, 0.08);
+            color: var(--gold);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+        }
+
+        .plans-list { display: flex; flex-direction: column; gap: 22px; }
+
+        /* CARDS DE INVESTIMENTO ULTRA-PREMIUM (ESTILO RELÓGIO) */
+        .plan-premium-card {
+            background: var(--card-glass); 
+            border: 1px solid var(--card-border);
+            border-radius: 26px; 
+            padding: 22px; 
+            position: relative; 
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            transition: all 0.4s ease;
+        }
+
+        /* IMAGEM DO RELÓGIO */
+        .watch-img-container {
+            width: 100%;
+            height: 190px;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 18px;
+            border: 1px solid rgba(255,255,255,0.05);
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .watch-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .plan-premium-card:hover .watch-img-container img {
+            transform: scale(1.08);
+        }
+
+        .plan-premium-card.matched-simulation {
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.15);
+            background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255, 215, 0, 0.01) 100%);
+            transform: translateY(-2px);
+        }
+
+        .card-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+
+        .plan-premium-card h3 { 
+            font-size: 1.05rem; 
+            color: #fff; 
+            font-weight: 800; 
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .plan-premium-card h3 i { color: var(--gold); font-size: 0.9rem; }
+        
+        .badge-cycle {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--card-border);
+            font-size: 0.65rem; 
+            color: var(--gold);
+            font-weight: 700; 
+            padding: 6px 14px;
+            border-radius: 30px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .price-holder { 
+            font-size: 2.2rem; 
+            font-weight: 900; 
+            color: #fff; 
+            margin-bottom: 18px; 
+            letter-spacing: -1px; 
+            text-align: left;
+            width: 100%;
+        }
+        .price-holder <small> {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .metrics-asymmetric-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            width: 100%; 
+            gap: 12px; 
+            margin-bottom: 18px; 
+        }
+        .metric-cell { 
+            background: rgba(0, 0, 0, 0.15); 
+            padding: 14px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(255,255,255,0.02); 
+        }
+        .metric-cell span { font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: 600; }
+        .metric-cell strong { font-size: 0.9rem; color: #fff; font-weight: 700; }
+
+        .total-yield-box { 
+            width: 100%; 
+            background: rgba(0, 230, 118, 0.03); 
+            border: 1px solid rgba(0, 230, 118, 0.12); 
+            padding: 15px; 
+            border-radius: 16px; 
+            margin-bottom: 22px; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .total-yield-box span { font-size: 0.68rem; color: var(--green-profit); text-transform: uppercase; font-weight: 700; letter-spacing: 0.3px; }
+        .total-yield-box strong { font-size: 1.1rem; color: var(--green-profit); font-weight: 800; }
+        
+        /* BOTÕES DE ATIVAÇÃO PREMIUM */
+        .btn-action-trigger { 
+            background: var(--gold-gradient); 
+            color: #020408; 
+            border: none; 
+            padding: 16px; 
+            border-radius: 16px; 
+            font-weight: 800; 
+            cursor: pointer; 
+            width: 100%; 
+            font-size: 0.88rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.6px; 
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2); 
+            transition: all 0.2s ease; 
+        }
+        .btn-action-trigger:active {
+            transform: scale(0.98);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.15);
+        }
+
+        .btn-action-locked { 
+            background: rgba(255, 255, 255, 0.02) !important; 
+            color: rgba(255,255,255,0.2) !important; 
+            cursor: not-allowed !important; 
+            box-shadow: none !important; 
+            border: 1px solid var(--card-border);
+        }
+
+        .plan-premium-card.locked-card { opacity: 0.45; }
+
+        /* MENU INFERIOR COMBINANDO 100% COM A HOME */
+        .nav-bottom { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            background: rgba(2, 4, 8, 0.85); 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 12px 0; 
+            border-top: 1px solid rgba(255,255,255,0.06); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 10000;
+            height: 76px;
+            align-items: center;
+        }
+        .nav-item { 
+            color: #4b5563; 
+            text-align: center; 
+            text-decoration: none; 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 5px;
+            padding: 6px 0;
+            transition: 0.2s;
+        }
+        .nav-item i { font-size: 1.25rem; }
+        .nav-item span { font-size: 0.68rem; font-weight: 500; }
+        .nav-item.active { color: #fff; }
+        .nav-item.active i { color: var(--gold); filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.4)); }
+
+    </style>
+</head>
+<body>
+
+    <div class="header-section">
+        <h2 class="animate__animated animate__fadeInLeft"><span>Ae</span>terna Boutique</h2>
+        <p class="animate__animated animate__fadeInLeft" style="animation-delay: 0.05s;">Adquira peças de luxo exclusivas e receba valorizações diárias sobre sua coleção.</p>
+    </div>
+
+    <div class="account-balance-card animate__animated animate__fadeInDown">
+        <small>Capital disponível para compras</small>
+        <div id="user-balance" class="balance-value">R$ 0,00</div>
+    </div>
+
+    <div class="simulator-card animate__animated animate__fadeInDown" style="animation-delay: 0.1s;">
+        <div class="simulator-header">
+            <h4>Simular Coleção</h4>
+            <span class="badge-cycle" id="sim-tier-badge" style="color: var(--gold); border-color: rgba(255,215,0,0.2);">Clássicos</span>
+        </div>
+        <div class="simulated-value-display">
+            <small>R$</small><span id="slider-render-val">100</span>
+        </div>
+        <div class="slider-container">
+            <input type="range" min="30" max="5000" value="100" step="10" class="range-slider" id="investment-slider">
+        </div>
+        <div class="simulator-results-grid">
+            <div class="sim-result-box">
+                <span>Rendimento da Peça</span>
+                <strong id="sim-calc-diario" style="color: var(--green-profit);">R$ 20,00/dia</strong>
+            </div>
+            <div class="sim-result-box">
+                <span>Brinde Exclusivo</span>
+                <strong id="sim-calc-roleta" style="color: var(--gold);">+2 Giros Roleta</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="tier-navigation-bar animate__animated animate__fadeIn">
+        <button class="tier-tab-btn active" id="tab-essencial" onclick="switchTierTab('essencial')">Clássicos</button>
+        <button class="tier-tab-btn" id="tab-prime" onclick="switchTierTab('prime')">Premium</button>
+        <button class="tier-tab-btn" id="tab-exclusive" onclick="switchTierTab('exclusive')">Alta Relojoaria</button>
+    </div>
+
+    <div id="container-planos" class="plans-list animate__animated animate__fadeInUp"></div>
+
+    <nav class="nav-bottom">
+        <a href="home.html" class="nav-item"><i class="fas fa-gem"></i><span>Acervo</span></a>
+        <a href="planos.html" class="nav-item active"><i class="fas fa-stopwatch"></i><span>Peças</span></a>
+        <a href="indicacao.html" class="nav-item"><i class="fas fa-share-alt"></i><span>Convite</span></a>
+        <a href="perfil.html" class="nav-item"><i class="fas fa-user-alt"></i><span>Conta</span></a>
+    </nav>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, Timestamp, increment, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDKDFw7khZzM9hIX7xbbrbFQeESiCLnmOw",
+        authDomain: "monety-site-9175f.firebaseapp.com",
+        projectId: "monety-site-9175f",
+        storageBucket: "monety-site-9175f.firebasestorage.app",
+        messagingSenderId: "840821848803",
+        appId: "1:840821848803:web:b99a5528e4bb925518a3d6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let saldoAtual = 0;
+    let uidUsuario = null;
+    let activeTier = 'essencial';
+    let currentSliderVal = 100;
+
+    // Links de imagens atualizados
+    const listaPlanos = [
+        { nome: 'MINI', valor: 30, dias: 30, diario: 6, total: 360, ativo: true, tier: 'essencial', img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80' },
+        { nome: 'BRONZE', valor: 50, dias: 30, diario: 10, total: 300, ativo: true, tier: 'essencial', img: 'https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?w=600&q=80' },
+        { nome: 'START', valor: 100, dias: 30, diario: 20, total: 600, ativo: true, tier: 'essencial', img: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=600&q=80' },
+        { nome: 'PRATA', valor: 200, dias: 30, diario: 40, total: 1200, ativo: true, tier: 'essencial', img: 'https://images.unsplash.com/photo-1539874754764-5a96559165b0?w=600&q=80' },
+        { nome: 'SPEED', valor: 350, dias: 30, diario: 70, total: 2100, ativo: true, tier: 'prime', img: 'https://images.unsplash.com/photo-1619134778706-7015533a6150?w=600&q=80' },
+        { nome: 'OURO', valor: 450, dias: 30, diario: 90, total: 2700, ativo: true, tier: 'prime', img: 'https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?w=600&q=80' },
+        { nome: 'ADVANCED', valor: 500, dias: 30, diario: 100, total: 3000, ativo: true, tier: 'prime', img: 'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=600&q=80' },
+        { nome: 'VITALITY', valor: 700, dias: 30, diario: 140, total: 4200, ativo: true, tier: 'prime', img: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=600&q=80' },
+        { nome: 'PREMIUM', valor: 1000, dias: 30, diario: 200, total: 6000, ativo: true, tier: 'exclusive', img: 'https://images.unsplash.com/photo-1639006570490-79c0c53f1080?w=600&q=80' },
+        { nome: 'VIP', valor: 2000, dias: 30, diario: 400, total: 12000, ativo: true, tier: 'exclusive', img: 'https://images.unsplash.com/photo-1629581678313-36cf745a9af9?w=600&q=80' },
+        { nome: 'ELITE', valor: 3000, dias: 30, diario: 0, total: 0, ativo: false, tier: 'exclusive', img: 'https://images.unsplash.com/photo-1622434641406-a158123450f9?w=600&q=80' },
+        { nome: 'ULTIMATE', valor: 5000, dias: 30, diario: 0, total: 0, ativo: false, tier: 'exclusive', img: 'https://images.unsplash.com/photo-1612817288484-6f916006741a?w=600&q=80' }
+    ];
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            uidUsuario = user.uid;
+            await carregarDados();
+            await verificarRendimentos();
+            initSimulator();
+            gerarPlanos();
+        } else { window.location.href = "login.html"; }
+    });
+
+    async function carregarDados() {
+        try {
+            const snap = await getDoc(doc(db, "usuarios", uidUsuario));
+            if (snap.exists()) {
+                const dados = snap.data();
+                saldoAtual = Number(dados.saldo || dados.balance) || 0;
+                document.getElementById('user-balance').innerText = `R$ ${saldoAtual.toFixed(2).replace('.', ',')}`;
+            }
+        } catch (e) { console.error("Erro ao carregar saldo:", e); }
+    }
+
+    async function verificarRendimentos() {
+        try {
+            const q = query(collection(db, "investimentos"), 
+                where("userId", "==", uidUsuario),
+                where("status", "==", "ativo")
+            );
+            
+            const snapshot = await getDocs(q);
+            const agora = new Date();
+            const MILISSEGUNDOS_POR_DIA = 1000 * 60 * 60 * 24;
+
+            for (const docInv of snapshot.docs) {
+                const dadosInv = docInv.data();
+                if (!dadosInv.ultimoPagamento) continue;
+
+                const ultimoPag = dadosInv.ultimoPagamento.toDate();
+                const dataExp = dadosInv.dataExpiracao.toDate();
+
+                if (agora > dataExp) {
+                    await updateDoc(doc(db, "investimentos", docInv.id), { status: "finalizado" });
+                    continue;
+                }
+
+                const diffTime = agora - ultimoPag;
+                const ciclosCompletos = Math.floor(diffTime / MILISSEGUNDOS_POR_DIA);
+
+                if (ciclosCompletos >= 1) {
+                    const valorPagar = dadosInv.rendimentoDiario * ciclosCompletos;
+                    
+                    await updateDoc(doc(db, "usuarios", uidUsuario), {
+                        saldoLucro: increment(valorPagar),
+                        totalEarned: increment(valorPagar)
+                    });
+
+                    const novaDataPagamento = new Date(ultimoPag.getTime() + (ciclosCompletos * MILISSEGUNDOS_POR_DIA));
+
+                    await updateDoc(doc(db, "investimentos", docInv.id), {
+                        ultimoPagamento: Timestamp.fromDate(novaDataPagamento)
+                    });
+
+                    await addDoc(collection(db, "historico"), {
+                        userId: uidUsuario,
+                        valor: valorPagar,
+                        tipo: "Rendimento",
+                        descricao: `Rendimento diário acumulado (${ciclosCompletos} dia(s)) - Relógio ${dadosInv.plano}`,
+                        data: Timestamp.now()
+                    });
+                }
+            }
+        } catch (error) { console.error("Erro nos rendimentos:", error); }
+    }
+
+    function initSimulator() {
+        const slider = document.getElementById('investment-slider');
+        
+        slider.addEventListener('input', (e) => {
+            currentSliderVal = Number(e.target.value);
+            document.getElementById('slider-render-val').innerText = currentSliderVal.toLocaleString('pt-BR');
+            
+            let melhorPlano = listaPlanos[0];
+            let menorDiferenca = Math.abs(currentSliderVal - listaPlanos[0].valor);
+            
+            listaPlanos.forEach(p => {
+                let diff = Math.abs(currentSliderVal - p.valor);
+                if (diff < menorDiferenca) {
+                    menorDiferenca = diff;
+                    melhorPlano = p;
+                }
+            });
+
+            if (activeTier !== melhorPlano.tier) {
+                activeTier = melhorPlano.tier;
+                document.querySelectorAll('.tier-tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById(`tab-${activeTier}`).classList.add('active');
+            }
+
+            document.getElementById('sim-calc-diario').innerText = `R$ ${melhorPlano.diario.toFixed(2).replace('.', ',')}/dia`;
+            document.getElementById('sim-tier-badge').innerText = melhorPlano.tier === 'essencial' ? 'CLÁSSICOS' : melhorPlano.tier === 'prime' ? 'PREMIUM' : 'ALTA RELOJOARIA';
+            
+            let girosSimulados = 1;
+            if (currentSliderVal >= 2000) girosSimulados = 10;
+            else if (currentSliderVal >= 1000) girosSimulados = 5;
+            else if (currentSliderVal >= 350) girosSimulados = 3;
+            else if (currentSliderVal >= 100) girosSimulados = 2;
+
+            document.getElementById('sim-calc-roleta').innerText = `+${girosSimulados} Giro(s) Roleta`;
+
+            gerarPlanos(melhorPlano.nome);
+        });
+    }
+
+    function gerarPlanos(planoDestacadoNome = null) {
+        const container = document.getElementById('container-planos');
+        const planosFiltrados = listaPlanos.filter(p => p.tier === activeTier);
+
+        container.innerHTML = planosFiltrados.map(p => {
+            const isMatched = planoDestacadoNome === p.nome;
+            return `
+            <div class="plan-premium-card ${p.ativo ? '' : 'locked-card'} ${isMatched ? 'matched-simulation' : ''}" id="card-plano-${p.nome}">
+                <div class="watch-img-container">
+                    <img src="${p.img}" alt="Relógio ${p.nome}" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-clock\' style=\'font-size:3.5rem;color:var(--gold);opacity:0.6;\'></i>';">
+                </div>
+                <div class="card-top-row">
+                    <h3><i class="fas fa-gem"></i> Coleção ${p.nome}</h3>
+                    <div class="badge-cycle">${p.dias} Dias Úteis</div>
+                </div>
+                <div class="price-holder"><small style="font-size:0.95rem; color:var(--text-muted); font-weight:600; margin-right:4px;">R$</small>${p.valor.toFixed(2).replace('.', ',')}</div>
+                <div class="metrics-asymmetric-grid">
+                    <div class="metric-cell">
+                        <span>Retorno Diário</span>
+                        <strong style="${isMatched ? 'color: var(--gold);' : ''}">R$ ${p.diario.toFixed(2).replace('.', ',')}</strong>
+                    </div>
+                    <div class="metric-cell">
+                        <span>Fração de Lucro</span>
+                        <strong style="color:var(--gold)">+ ${(p.valor > 0 ? (p.diario / p.valor * 100) : 0).toFixed(1)}% /dia</strong>
+                    </div>
+                </div>
+                <div class="total-yield-box">
+                    <span>Projeção de Retorno Total</span>
+                    <strong>R$ ${p.total.toFixed(2).replace('.', ',')}</strong>
+                </div>
+                <button class="${p.ativo ? 'btn-action-trigger' : 'btn-action-trigger btn-action-locked'}" 
+                    onclick="${p.ativo ? `comprarPlano('${p.nome}', ${p.valor}, ${p.diario}, ${p.dias})` : ''}">
+                    ${p.ativo ? 'Adquirir Peça' : '<i class="fas fa-lock" style="margin-right:5px;"></i> Indisponível'}
+                </button>
+            </div>`;
+        }).join('');
+    }
+
+    async function processarComissoesRede(valorPlano) {
+        try {
+            const compradorSnap = await getDoc(doc(db, "usuarios", uidUsuario));
+            if (!compradorSnap.exists()) return;
+            
+            const dados = compradorSnap.data();
+            if (dados.jaGerouBonus === true) return;
+
+            // --- NOVA REGRA: BONIFICAÇÃO EM GIRO PARA O PADRINHO (NÍVEL 1) ---
+            if (dados.indicadoPor && dados.indicadoPor.trim() !== "") {
+                try {
+                    const padrinhoRef = doc(db, "usuarios", dados.indicadoPor);
+                    await updateDoc(padrinhoRef, {
+                        girosRoleta: increment(1)
+                    });
+                    
+                    await addDoc(collection(db, "historico"), {
+                        userId: dados.indicadoPor,
+                        valor: 0,
+                        tipo: "Bônus de Indicação",
+                        descricao: `Recebeu 1 Giro de Roleta - Compra efetuada por ${dados.nome || 'Convidado L1'}`,
+                        data: Timestamp.now()
+                    });
+                } catch (errGiro) {
+                    console.error("Erro ao creditar giro ao padrinho:", errGiro);
+                }
+            }
+            // -----------------------------------------------------------------
+
+            const rede = [
+                { id: dados.indicadoPor, pct: 0.10 },      
+                { id: dados.indicadoPorAvo, pct: 0.05 },  
+                { id: dados.indicadoPorBisavo, pct: 0.02 } 
+            ];
+
+            for (let i = 0; i < rede.length; i++) {
+                const indicanteId = rede[i].id;
+                if (indicanteId && indicanteId.trim() !== "") {
+                    let porcentagem = rede[i].pct;
+                    
+                    if (i === 0) { 
+                        const paiSnap = await getDoc(doc(db, "usuarios", indicanteId));
+                        if (paiSnap.exists()) {
+                            const count = paiSnap.data().indicadosCount || 0;
+                            if (count >= 50) porcentagem = 0.20;
+                            else if (count >= 10) porcentagem = 0.15;
+                        }
+                    }
+
+                    const bonus = valorPlano * porcentagem;
+                    await updateDoc(doc(db, "usuarios", indicanteId), {
+                        saldoLucro: increment(bonus),
+                        totalComissoes: increment(bonus)
+                    });
+
+                    await addDoc(collection(db, "historico"), {
+                        userId: indicanteId,
+                        valor: bonus,
+                        tipo: "Indicação",
+                        descricao: `Comissão Nível ${i+1} - Referente a ${dados.nome || 'Novo Membro'}`,
+                        data: Timestamp.now()
+                    });
+                }
+            }
+            await updateDoc(doc(db, "usuarios", uidUsuario), { jaGerouBonus: true });
+        } catch (e) { console.error("Erro no processamento de rede:", e); }
+    }
+
+    window.comprarPlano = async (nome, valor, diario, dias) => {
+        try {
+            await carregarDados();
+
+            if (saldoAtual < valor) {
+                return Swal.fire({ 
+                    icon: 'error', 
+                    title: 'Saldo insuficiente', 
+                    text: 'Você precisa de saldo de depósito para adquirir esta peça.',
+                    background: '#060b19', color: '#fff', confirmButtonColor: '#ffd700'
+                });
+            }
+
+            const confirm = await Swal.fire({
+                title: 'Confirmar Compra?',
+                text: `Deseja adquirir a coleção ${nome} por R$ ${valor.toFixed(2).replace('.', ',')}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#00e676',
+                cancelButtonColor: 'rgba(255,255,255,0.05)',
+                confirmButtonText: 'Confirmar Compra',
+                cancelButtonText: 'Voltar',
+                background: '#060b19', color: '#fff'
+            });
+
+            if (confirm.isConfirmed) {
+                Swal.fire({ 
+                    title: 'Processando...', 
+                    allowOutsideClick: false, 
+                    didOpen: () => Swal.showLoading(), 
+                    background: '#060b19', color: '#fff' 
+                });
+
+                const dataExp = new Date();
+                dataExp.setDate(dataExp.getDate() + dias);
+
+                let girosGanhos = 1;
+                if (valor >= 2000) girosGanhos = 10;
+                else if (valor >= 1000) girosGanhos = 5;
+                else if (valor >= 350) girosGanhos = 3;
+                else if (valor >= 100) girosGanhos = 2;
+
+                await addDoc(collection(db, "investimentos"), {
+                    userId: uidUsuario,
+                    plano: nome,
+                    valor: valor,
+                    rendimentoDiario: diario,
+                    status: "ativo",
+                    timestamp: Timestamp.now(),
+                    dataExpiracao: Timestamp.fromDate(dataExp),
+                    ultimoPagamento: Timestamp.now() 
+                });
+
+                const userRef = doc(db, "usuarios", uidUsuario);
+                const userSnap = await getDoc(userRef);
+                const campoSaldo = userSnap.data().balance !== undefined ? "balance" : "saldo";
+
+                await updateDoc(userRef, { 
+                    [campoSaldo]: increment(-valor),
+                    girosRoleta: increment(girosGanhos)
+                });
+
+                await addDoc(collection(db, "historico"), {
+                    userId: uidUsuario,
+                    valor: -valor, 
+                    tipo: "Aquisição de Relógio", 
+                    descricao: `Relógio da Coleção ${nome} (+${girosGanhos} Giros Roleta)`,
+                    data: Timestamp.now()
+                });
+
+                try {
+                    await processarComissoesRede(valor);
+                } catch (errRede) {
+                    console.error("Erro ao pagar comissões:", errRede);
+                }
+
+                await Swal.fire({ 
+                    icon: 'success', 
+                    title: 'Relógio Adquirido!', 
+                    text: `Sua valorização começará em 24h e você ganhou +${girosGanhos} giros na roleta!`, 
+                    timer: 2500, 
+                    showConfirmButton: false, 
+                    background: '#060b19', color: '#fff' 
+                });
+
+                window.location.href = "home.html";
+            }
+        } catch (e) {
+            console.error("ERRO:", e);
+            Swal.fire({ 
+                icon: 'error', 
+                title: 'Falha na Compra', 
+                text: 'Houve um erro técnico. Verifique seu saldo.', 
+                background: '#060b19', color: '#fff' 
+            });
+        }
+    };
+</script>
+</body>
+</html>

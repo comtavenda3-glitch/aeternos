@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Administração - Aeterna</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(180deg, #0c0d12 0%, #050508 100%);
+            --card-glass: rgba(255, 255, 255, 0.02);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --aeterna-gold: #e5c158;
+            --gold-gradient: linear-gradient(135deg, #f3c63f 0%, #b88728 100%);
+            --text-muted: #94a3b8;
+            --green-success: #10b981;
+            --red-danger: #ef4444;
+        }
+
+        * { 
+            margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; 
+            outline: none !important; -webkit-tap-highlight-color: transparent;
+        }
+        body { background: var(--bg-gradient); color: #f8fafc; padding: 30px 20px; min-height: 100vh; }
+        
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .admin-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 35px; padding-bottom: 20px; border-bottom: 1px solid var(--card-border);
+        }
+        .page-title { font-size: 1.6rem; font-weight: 800; color: white; }
+        .page-title b { color: var(--aeterna-gold); }
+        .status-online { font-size: 0.8rem; color: var(--green-success); font-weight: 700; }
+
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px; margin-bottom: 35px;
+        }
+        .stat-card {
+            background: var(--card-glass); border: 1px solid var(--card-border);
+            padding: 25px; border-radius: 20px; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .stat-card i { font-size: 1.6rem; color: var(--aeterna-gold); margin-bottom: 12px; }
+        .stat-card h2 { font-size: 1.6rem; margin-bottom: 6px; font-weight: 700; }
+        .stat-card p { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+
+        .admin-section {
+            background: var(--card-glass); border: 1px solid var(--card-border);
+            padding: 25px; border-radius: 24px; margin-bottom: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+        .section-title {
+            font-size: 0.95rem; font-weight: 700; color: var(--aeterna-gold); margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .grid-inputs { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px; }
+        @media(min-width: 600px) { .grid-inputs { grid-template-columns: 1fr 1fr 1fr; } }
+
+        .form-group { display: flex; flex-direction: column; text-align: left; width: 100%; }
+        .form-group label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+        
+        input, textarea, select {
+            background: rgba(0, 0, 0, 0.4); border: 1px solid var(--card-border);
+            padding: 14px; border-radius: 12px; color: white; font-size: 0.9rem; font-weight: 600; transition: 0.3s;
+        }
+        input:focus, textarea:focus, select:focus { border-color: var(--aeterna-gold); }
+
+        .btn-submit {
+            background: var(--gold-gradient); border: none; width: 100%; padding: 15px;
+            border-radius: 14px; font-size: 0.9rem; font-weight: 800; color: #000;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(229, 193, 88, 0.2); transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-submit:active { transform: scale(0.97); }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.04); border: 1px solid var(--card-border);
+            color: white; padding: 12px 20px; border-radius: 12px; font-weight: 700;
+            font-size: 0.85rem; cursor: pointer; transition: 0.3s;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.08); }
+        .btn-danger { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--red-danger); color: var(--red-danger); }
+        .btn-danger:hover { background: rgba(239, 68, 68, 0.25); }
+        .btn-danger.active { background: var(--red-danger); color: white; }
+
+        #user-result {
+            background: rgba(0,0,0,0.3); padding: 20px; border-radius: 16px;
+            display: none; margin-top: 20px; border: 1px solid var(--card-border);
+        }
+
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 14px; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; border-bottom: 1px solid var(--card-border); }
+        td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 0.85rem; font-weight: 500; }
+
+        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        .status-ativo { background: rgba(16, 185, 129, 0.15); color: var(--green-success); }
+        .status-bloqueado { background: rgba(239, 68, 68, 0.15); color: var(--red-danger); }
+
+        #admin-panel { display: none; }
+        #access-denied { display: none; text-align: center; margin-top: 100px; }
+    </style>
+</head>
+<body>
+
+    <div id="loading" style="text-align: center; margin-top: 100px;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 2.5rem; color: var(--aeterna-gold);"></i>
+        <p style="margin-top:20px; color: var(--text-muted); font-weight: 600;">Validando credenciais Master Aeterna...</p>
+    </div>
+
+    <div id="access-denied" class="container" style="max-width: 450px;">
+        <div class="admin-section" style="text-align: center;">
+            <i class="fas fa-user-lock" style="font-size: 3.5rem; color: var(--red-danger); margin-bottom: 20px;"></i>
+            <h1 class="page-title" style="margin-bottom: 10px;">Acesso Restrito</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px;">Apenas administradores master autenticados possuem autorização de entrada.</p>
+            <a href="login.html" class="btn-submit" style="text-decoration: none; color: #000;">Voltar para o Login</a>
+        </div>
+    </div>
+
+    <div id="admin-panel" class="container">
+        <div class="admin-header">
+            <h1 class="page-title">Painel Master<b>.</b></h1>
+            <span class="status-online"><i class="fas fa-circle" style="font-size: 0.65rem; margin-right: 5px;"></i> Sistema Online</span>
+        </div>
+
+        <div class="admin-section">
+            <div class="section-title"><i class="fas fa-ticket-alt"></i> Gerenciador de Códigos Promocionais Diários</div>
+            <div class="grid-inputs">
+                <div class="form-group">
+                    <label>Nome do Código Promocional</label>
+                    <input type="text" id="admin-code-name" placeholder="EX: BRONZEHOJE20" style="text-transform: uppercase;">
+                </div>
+                <div class="form-group">
+                    <label>Valor do Bônus (R$)</label>
+                    <input type="number" id="admin-code-value" placeholder="EX: 10.00" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Limite de Ativações</label>
+                    <input type="number" id="admin-code-limit" placeholder="EX: 50">
+                </div>
+            </div>
+            <button class="btn-submit" id="btn-generate">Gerar e Ativar Código Diário ⚡</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+            <div class="admin-section">
+                <div class="section-title"><i class="fas fa-bullhorn"></i> Mural de Avisos Global</div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <textarea id="input-aviso" rows="2" placeholder="Digite uma mensagem global para a plataforma..."></textarea>
+                </div>
+                <button class="btn-submit" id="btn-publicar-aviso">Publicar Mensagem</button>
+            </div>
+
+            <div class="admin-section">
+                <div class="section-title"><i class="fas fa-gift"></i> Configurar Bônus de Novo Cadastro</div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <input type="number" id="input-bonus-valor" placeholder="Valor em R$ (Ex: 10.00)" step="0.01">
+                </div>
+                <button class="btn-submit" id="btn-salvar-bonus">Definir Bônus Padrão</button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-wallet"></i>
+                <h2 id="stat-saldo-total">R$ 0,00</h2>
+                <p>Total em Contas</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-comment-dollar"></i>
+                <h2 id="stat-saques-pendentes">R$ 0,00</h2>
+                <p>Saques Pendentes</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-users"></i>
+                <h2 id="stat-total-usuarios">0</h2>
+                <p>Total Clientes</p>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <div class="section-title"><i class="fas fa-user-cog"></i> Localizar e Modificar Usuário</div>
+            <div style="display: flex; gap: 10px; margin-bottom: 5px;">
+                <input type="email" id="search-email" placeholder="E-mail exato do usuário..." style="flex: 1;">
+                <button class="btn-secondary" id="btn-search-user" style="padding: 0 25px;">Buscar</button>
+            </div>
+
+            <div id="user-result">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+                    <div>
+                        <p id="res-nome" style="font-weight: 700; font-size: 1.1rem; margin-bottom: 4px;"></p>
+                        <p id="res-email" style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 12px;"></p>
+                        <span id="res-status-badge" class="status-badge">ATIVO</span>
+                        <p style="margin-top: 18px; font-size: 0.9rem; color: var(--text-muted);">Saldo Disponível: <br><span id="res-saldo" style="color: var(--aeterna-gold); font-weight: 800; font-size: 1.4rem;">R$ 0,00</span></p>
+                    </div>
+                    <div style="text-align: right; min-width: 220px; display: flex; flex-direction: column; gap: 10px;">
+                        <div class="form-group">
+                            <label>Adicionar/Remover Valor</label>
+                            <input type="number" id="input-new-amount" placeholder="Ex: 50.00 ou -50.00" step="0.01">
+                        </div>
+                        <button class="btn-submit" id="btn-update-balance">Salvar Novo Saldo</button>
+                        <button class="btn-secondary btn-danger" id="btn-toggle-ban">Banir Conta</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <div class="section-title"><i class="fas fa-history"></i> Clientes Recentes</div>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Status</th><th>E-mail</th><th>Saldo</th><th>Ação</th></tr></thead>
+                    <tbody id="lista-usuarios-recentes"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <div class="section-title"><i class="fas fa-hand-holding-usd"></i> Ordens de Saque Pendentes</div>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Data Solicitada</th><th>Chave PIX</th><th>Valor Líquido</th><th>Ação</th></tr></thead>
+                    <tbody id="lista-saques"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, doc, updateDoc, getDoc, setDoc, limit, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKDFw7khZzM9hIX7xbbrbFQeESiCLnmOw",
+            authDomain: "monety-site-9175f.firebaseapp.com",
+            projectId: "monety-site-9175f",
+            storageBucket: "monety-site-9175f.firebasestorage.app",
+            messagingSenderId: "840821848803",
+            appId: "1:840821848803:web:b99a5528e4bb925518a3d6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const ADMIN_EMAIL = "lipedosantos2008@gmail.com";
+        const URL_PIPEDREAM_PAYOUT = "https://eo9elnupivtomta.m.pipedream.net"; 
+        
+        let userEncontradoId = null;
+        let userStatusAtual = "ativo";
+
+        const Toast = Swal.mixin({
+            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0c0d12', color: '#fff'
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            const loading = document.getElementById('loading');
+            const adminPanel = document.getElementById('admin-panel');
+            const deniedDiv = document.getElementById('access-denied');
+
+            if (user) {
+                if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+                    loading.style.display = 'none';
+                    deniedDiv.style.display = 'none';
+                    adminPanel.style.display = 'block'; 
+                    carregarDadosIniciais();
+                } else {
+                    loading.style.display = 'none';
+                    if(adminPanel) adminPanel.remove();
+                    deniedDiv.style.display = 'block';
+                }
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        function carregarDadosIniciais() {
+            carregarSaquesPendentes();
+            carregarEstatisticasGerais();
+            carregarUsuariosNaTabela();
+            carregarAvisoConfig();
+            carregarBonusConfig();
+        }
+
+        // LÓGICA DO MÓDULO DE CÓDIGOS PROMOCIONAIS (BLINDADA E PADRONIZADA)
+        document.getElementById('btn-generate').addEventListener('click', async () => {
+            const codigoInput = document.getElementById('admin-code-name').value.trim();
+            const valorBonus = document.getElementById('admin-code-value').value.trim();
+            const limite = document.getElementById('admin-code-limit').value.trim();
+
+            if (!codigoInput || !valorBonus || isNaN(valorBonus) || Number(valorBonus) < 0 || !limite || Number(limite) <= 0) {
+                Swal.fire({ icon: 'error', title: 'Campos Inválidos', text: 'Preencha o nome, valor do bônus e o limite corretamente.', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
+                return;
+            }
+
+            const idCupom = codigoInput.toUpperCase();
+
+            try {
+                const btnGenerate = document.getElementById('btn-generate');
+                const textoOriginal = btnGenerate.innerHTML;
+                btnGenerate.disabled = true;
+                btnGenerate.innerText = "Processando...";
+
+                // Gravação com chaves exatas para evitar conflitos de case-sensitive
+                await setDoc(doc(db, "codigos_promocionais", idCupom), {
+                    codigo: idCupom,
+                    VALOR: Number(valorBonus),
+                    STATUS: "ativo",
+                    limiteUso: Number(limite),
+                    usadosCount: 0,
+                    usuariosQueUsaram: [],
+                    dataCriacao: new Date().getTime()
+                });
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Código Ativado!',
+                    text: `O cupom "${idCupom}" (R$ ${parseFloat(valorBonus).toFixed(2)}) foi salvo no banco e está pronto para uso!`,
+                    background: '#0c0d12',
+                    color: '#fff',
+                    confirmButtonColor: '#e5c158'
+                });
+
+                document.getElementById('admin-code-name').value = "";
+                document.getElementById('admin-code-value').value = "";
+                document.getElementById('admin-code-limit').value = "";
+                
+                btnGenerate.disabled = false;
+                btnGenerate.innerHTML = textoOriginal;
+
+            } catch (error) {
+                console.error("Erro ao criar cupom:", error);
+                Swal.fire({ icon: 'error', title: 'Erro de Gravação', text: 'Não foi possível cadastrar o código no Firebase.', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
+                document.getElementById('btn-generate').disabled = false;
+                document.getElementById('btn-generate').innerHTML = "Gerar e Ativar Código Diário ⚡";
+            }
+        });
+
+        // MURAL DE AVISOS
+        async function carregarAvisoConfig() {
+            try {
+                const snap = await getDoc(doc(db, "configuracoes", "aviso_global"));
+                if (snap.exists()) document.getElementById('input-aviso').value = snap.data().texto || "";
+            } catch(e) {}
+        }
+
+        document.getElementById('btn-publicar-aviso').addEventListener('click', async () => {
+            const texto = document.getElementById('input-aviso').value;
+            try {
+                await setDoc(doc(db, "configuracoes", "aviso_global"), { texto, data: new Date() });
+                Toast.fire({ icon: 'success', title: 'Mensagem publicada!' });
+            } catch (e) { Toast.fire({ icon: 'error', title: 'Falha ao salvar' }); }
+        });
+
+        // CONFIGURAÇÃO BÔNUS CADASTRO
+        async function carregarBonusConfig() {
+            try {
+                const snap = await getDoc(doc(db, "configuracoes", "bonus_cadastro"));
+                if (snap.exists()) document.getElementById('input-bonus-valor').value = snap.data().valor || 0;
+            } catch(e) {}
+        }
+
+        document.getElementById('btn-salvar-bonus').addEventListener('click', async () => {
+            const valor = parseFloat(document.getElementById('input-bonus-valor').value);
+            if (isNaN(valor)) return Toast.fire({ icon: 'error', title: 'Valor inválido' });
+            try {
+                await setDoc(doc(db, "configuracoes", "bonus_cadastro"), { valor: valor, atualizadoEm: new Date() });
+                Toast.fire({ icon: 'success', title: 'Bônus atualizado!' });
+            } catch (e) { Toast.fire({ icon: 'error', title: 'Erro ao salvar' }); }
+        });
+
+        // BUSCAR USUÁRIO
+        document.getElementById('btn-search-user').addEventListener('click', async () => {
+            const email = document.getElementById('search-email').value.trim();
+            if (!email) return;
+            const q = query(collection(db, "usuarios"), where("email", "==", email));
+            const snap = await getDocs(q);
+            if (snap.empty) return Swal.fire({ icon: 'error', title: 'Usuário não encontrado', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
+            const data = snap.docs[0].data();
+            userEncontradoId = snap.docs[0].id;
+            userStatusAtual = data.status || "ativo";
+            document.getElementById('res-nome').innerText = data.nome || "Sem Nome";
+            document.getElementById('res-email').innerText = data.email;
+            document.getElementById('res-saldo').innerText = `R$ ${parseFloat(data.saldo || 0).toFixed(2)}`;
+            const badge = document.getElementById('res-status-badge');
+            badge.innerText = userStatusAtual.toUpperCase();
+            badge.className = `status-badge status-${userStatusAtual}`;
+            const btnBan = document.getElementById('btn-toggle-ban');
+            btnBan.innerText = userStatusAtual === "ativo" ? "BANIR USUÁRIO" : "REATIVAR USUÁRIO";
+            btnBan.className = `btn-secondary btn-danger ${userStatusAtual === "ativo" ? 'active' : ''}`;
+            document.getElementById('user-result').style.display = 'block';
+        });
+
+        document.getElementById('btn-toggle-ban').addEventListener('click', async () => {
+            const novoStatus = userStatusAtual === "ativo" ? "bloqueado" : "ativo";
+            const confirm = await Swal.fire({ title: 'Confirmar?', text: `Mudar status para ${novoStatus}?`, icon: 'warning', showCancelButton: true, background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
+            if (!confirm.isConfirmed) return;
+            await updateDoc(doc(db, "usuarios", userEncontradoId), { status: novoStatus });
+            document.getElementById('btn-search-user').click();
+            carregarUsuariosNaTabela();
+            Toast.fire({ icon: 'success', title: 'Status updated!' });
+        });
+
+        document.getElementById('btn-update-balance').addEventListener('click', async () => {
+            const valorAdicionar = parseFloat(document.getElementById('input-new-amount').value);
+            if (isNaN(valorAdicionar)) return;
+            const ref = doc(db, "usuarios", userEncontradoId);
+            
+            await updateDoc(ref, { saldo: increment(valorAdicionar) });
+            
+            document.getElementById('input-new-amount').value = "";
+            document.getElementById('btn-search-user').click();
+            carregarEstatisticasGerais();
+            Toast.fire({ icon: 'success', title: 'Saldo atualizado!' });
+        });
+
+        // CARREGAR MÉTRICAS GERAIS
+        async function carregarEstatisticasGerais() {
+            try {
+                const snapUsers = await getDocs(collection(db, "usuarios"));
+                let totalSaldos = 0;
+                snapUsers.forEach(d => totalSaldos += parseFloat(d.data().saldo || 0));
+                
+                const qSaques = query(collection(db, "saques"), where("status", "==", "pendente"));
+                const snapSaques = await getDocs(qSaques);
+                let totalSaquesP = 0;
+                snapSaques.forEach(d => totalSaquesP += parseFloat(d.data().valorReceber || 0));
+                
+                document.getElementById('stat-saldo-total').innerText = `R$ ${totalSaldos.toFixed(2)}`;
+                document.getElementById('stat-saques-pendentes').innerText = `R$ ${totalSaquesP.toFixed(2)}`;
+                document.getElementById('stat-total-usuarios').innerText = snapUsers.size;
+            } catch(e) {}
+        }
+
+        // CARREGAR HISTÓRICO DE CADASTROS RECENTES
+        async function carregarUsuariosNaTabela() {
+            try {
+                const q = query(collection(db, "usuarios"), limit(15));
+                const snapshot = await getDocs(q);
+                const body = document.getElementById('lista-usuarios-recentes');
+                body.innerHTML = "";
+                snapshot.forEach(docSnap => {
+                    const u = docSnap.data();
+                    const status = u.status || "ativo";
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><span class="status-badge status-${status}">${status}</span></td>
+                        <td>${u.email}</td>
+                        <td style="color:var(--aeterna-gold)">R$ ${parseFloat(u.saldo || 0).toFixed(2)}</td>
+                        <td><button class="btn-secondary" style="padding:5px 12px; font-size:11px;" id="view-${docSnap.id}">VER</button></td>
+                    `;
+                    body.appendChild(tr);
+                    document.getElementById(`view-${docSnap.id}`).onclick = () => {
+                        document.getElementById('search-email').value = u.email;
+                        document.getElementById('btn-search-user').click();
+                        window.scrollTo({ top: 400, behavior: 'smooth' });
+                    };
+                });
+            } catch(e) {}
+        }
+
+        // GERENCIAMENTO DE HISTÓRICO FINANCEIRO (SAQUES)
+        async function finalizarSaqueNoSistema(id, metodo) {
+            await updateDoc(doc(db, "saques", id), { 
+                status: "concluido", 
+                dataPagamento: new Date(), 
+                metodo: metodo 
+            });
+
+            try {
+                const colecoesHistorico = ["historico", "historico_financeiro", "transacoes"];
+                for (const nomeCol of colecoesHistorico) {
+                    const q = query(collection(db, nomeCol), where("saqueId", "==", id));
+                    const snap = await getDocs(q);
+                    for (const d of snap.docs) {
+                        await updateDoc(doc(db, nomeCol, d.id), { status: "concluido" });
+                    }
+                }
+            } catch (e) {
+                console.error("Erro sincronizando coleções secundárias:", e);
+            }
+        }
+
+        async function carregarSaquesPendentes() {
+            const lista = document.getElementById('lista-saques');
+            try {
+                const q = query(collection(db, "saques"), where("status", "==", "pendente"));
+                const snapshot = await getDocs(q);
+                
+                if (snapshot.empty) {
+                    lista.innerHTML = "<tr><td colspan='4' style='text-align:center; color:var(--text-muted); padding:20px;'>Nenhuma solicitação em aberto.</td></tr>";
+                    return;
+                }
+
+                lista.innerHTML = "";
+                snapshot.forEach(docSnap => {
+                    const s = docSnap.data();
+                    const id = docSnap.id;
+                    const tr = document.createElement('tr');
+                    
+                    let dataExibicao = '---';
+                    if (s.data) {
+                        dataExibicao = s.data.toDate ? s.data.toDate().toLocaleString('pt-BR') : s.data;
+                    }
+
+                    tr.innerHTML = `
+                        <td>${dataExibicao}</td>
+                        <td><small style="color:var(--text-muted); font-family:monospace;">${s.chavePix || 'Não informada'}</small></td>
+                        <td style="color:var(--green-success); font-weight:bold;">R$ ${parseFloat(s.valorReceber || 0).toFixed(2)}</td>
+                        <td><button class="btn-submit" style="padding:8px 14px; font-size:11px; border-radius:8px;" id="btn-pay-${id}">Disparar API</button></td>
+                    `;
+                    lista.appendChild(tr);
+
+                    document.getElementById(`btn-pay-${id}`).onclick = async () => {
+                        const confirm = await Swal.fire({ 
+                            title: 'Enviar Pagamento?', 
+                            text: `Processar transferência de R$ ${parseFloat(s.valorReceber).toFixed(2)} para a chave ${s.chavePix}?`, 
+                            icon: 'warning', 
+                            showCancelButton: true, 
+                            background: '#0c0d12', 
+                            color: '#fff',
+                            confirmButtonColor: '#e5c158'
+                        });
+                        
+                        if (!confirm.isConfirmed) return;
+
+                        const btn = document.getElementById(`btn-pay-${id}`);
+                        const textoOriginal = btn.innerHTML;
+                        btn.disabled = true;
+                        btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i>";
+
+                        try {
+                            const response = await fetch(URL_PIPEDREAM_PAYOUT, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                                body: JSON.stringify({
+                                    amount: parseFloat(s.valorReceber),
+                                    pixKey: s.chavePix,
+                                    saqueId: id,
+                                    email: s.email || 'Não informado'
+                                })
+                            });
+
+                            if (response.ok) {
+                                await finalizarSaqueNoSistema(id, "AUTOMATICO_PIPEDREAM");
+                                Swal.fire({ icon: 'success', title: 'Sucesso!', text: 'Solicitação concluída via API automatizada.', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
+                                carregarDadosIniciais();
+                            } else {
+                                const text = await response.text();
+                                throw new Error(`Status ${response.status}: ${text}`);
+                            }
+                        } catch (error) {
+                            console.error(error);
+                            
+                            const confirmManual = await Swal.fire({
+                                icon: 'error',
+                                title: 'Link de Automação Indisponível',
+                                text: `O intermediador reportou um erro (${error.message}). Deseja liquidar manualmente de forma local e realizar o PIX via app bancário próprio?`,
+                                showCancelButton: true,
+                                confirmButtonText: 'Dar Baixa Manual',
+                                cancelButtonText: 'Abortar Operação',
+                                confirmButtonColor: '#ef4444',
+                                background: '#0c0d12',
+                                color: '#fff'
+                            });
+
+                            if (confirmManual.isConfirmed) {
+                                await finalizarSaqueNoSistema(id, "MANUAL_ERRO_CONEXAO");
+                                Swal.fire({ icon: 'success', title: 'Liquidação Salva!', text: 'Bancos e históricos sincronizados. Não esqueça de efetuar a transferência manual externa.', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
+                                carregarDadosIniciais();
+                            } else {
+                                btn.disabled = false;
+                                btn.innerHTML = textoOriginal;
+                            }
+                        }
+                    };
+                });
+            } catch (error) {
+                console.error("Erro geral na listagem de saques:", error);
+            }
+        }
+    </script>
+</body>
+</html>

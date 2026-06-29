@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - Aeterna</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(180deg, #0c0d12 0%, #050508 100%);
+            --card-glass: rgba(255, 255, 255, 0.02);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --aeterna-gold: #e5c158;
+            --gold-gradient: linear-gradient(135deg, #f3c63f 0%, #b88728 100%);
+            --gold-glow: rgba(229, 193, 88, 0.2);
+            --text-muted: #94a3b8;
+            --tg-blue: #229ed9;
+            --red-danger: #ff4d4d;
+            --green-success: #10b981;
+            
+            /* Cores de Patentes Classudas */
+            --rank-novato: #94a3b8;
+            --rank-bronze: #cd7f32;
+            --rank-prata: #cbd5e1;
+            --rank-ouro: #f59e0b;
+            --rank-platina: #10b981;
+            --rank-diamante: #38bdf8;
+            --rank-embaixador: #a855f7;
+            --rank-tita: #e5c158;
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Inter', sans-serif; 
+            outline: none !important; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body { 
+            background: var(--bg-gradient); 
+            color: #f8fafc; 
+            padding: 15px 20px; 
+            padding-bottom: 120px; 
+            min-height: 100vh; 
+            overflow-x: hidden;
+        }
+
+        /* FEED LIVE PROOF (FOMO) - ESTILO AETERNA */
+        .live-proof-banner {
+            background: rgba(229, 193, 88, 0.03);
+            border: 1px solid rgba(229, 193, 88, 0.12);
+            border-radius: 14px;
+            padding: 11px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        .live-proof-icon {
+            width: 7px;
+            height: 7px;
+            background: var(--aeterna-gold);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--aeterna-gold);
+            animation: pulse 1.5s infinite;
+        }
+        #live-proof-text b {
+            color: var(--aeterna-gold);
+        }
+
+        /* TÍTULO PREMIUM */
+        .page-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin: 5px 5px 20px 5px;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+        }
+        .page-title b { color: var(--aeterna-gold); text-shadow: 0 0 15px rgba(229, 193, 88, 0.25); }
+
+        /* BLACK CARD EXCLUSIVO DE INVESTIDOR */
+        .investor-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(229,193,88,0.01) 100%);
+            border-radius: 24px;
+            padding: 25px;
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .investor-card::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -15%;
+            width: 180px;
+            height: 180px;
+            background: rgba(229, 193, 88, 0.08);
+            filter: blur(45px);
+            border-radius: 50%;
+        }
+
+        .card-header-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 58px;
+            height: 58px;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1.5px solid var(--rank-novato);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: var(--rank-novato);
+            transition: all 0.5s ease;
+        }
+
+        .user-meta h2 { font-size: 1.15rem; font-weight: 700; text-transform: capitalize; color: #fff; letter-spacing: -0.3px; }
+        .user-meta p { color: var(--text-muted); font-size: 0.8rem; margin-top: 2px; }
+        
+        .rank-badge {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 7px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 6px;
+            letter-spacing: 0.6px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #fff;
+            transition: all 0.5s ease;
+        }
+
+        .card-balances-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 10px;
+        }
+
+        .balance-block span {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
+
+        .balance-block small {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        /* CARD DO PLANO DE CARREIRA */
+        .career-card {
+            background: var(--card-glass);
+            border-radius: 20px;
+            padding: 16px 20px;
+            border: 1px solid var(--card-border);
+            margin-bottom: 15px;
+        }
+        .career-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .career-header small { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;}
+        .career-header span { font-size: 0.75rem; font-weight: 600; color: var(--aeterna-gold); }
+        
+        .progress-capsule {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--gold-gradient);
+            border-radius: 10px;
+            box-shadow: 0 0 12px var(--aeterna-gold);
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* COFRE FORTE AETERNA */
+        .vault-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(229, 193, 88, 0.01) 100%);
+            border-radius: 24px;
+            padding: 22px;
+            border: 1px solid rgba(229, 193, 88, 0.12);
+            margin-bottom: 15px;
+            position: relative;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+        }
+        .vault-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .vault-icon-box {
+            width: 44px;
+            height: 44px;
+            background: rgba(229, 193, 88, 0.05);
+            border: 1px solid rgba(229, 193, 88, 0.2);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--aeterna-gold);
+            font-size: 1.1rem;
+            animation: pulse-gold 2s infinite ease-in-out;
+        }
+        .vault-title-meta h3 { font-size: 1rem; font-weight: 700; color: #fff; }
+        .vault-title-meta p { font-size: 0.75rem; color: var(--text-muted); }
+
+        .vault-status-box {
+            background: rgba(0,0,0,0.25);
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--card-border);
+        }
+        .vault-timer {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.3px;
+        }
+        .vault-timer i { color: var(--aeterna-gold); margin-right: 5px; }
+
+        .btn-vault-action {
+            background: var(--gold-gradient);
+            border: none;
+            color: #000;
+            padding: 9px 16px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(229, 193, 88, 0.2);
+            transition: 0.2s;
+        }
+        .btn-vault-action:active { transform: scale(0.96); }
+
+        /* BOTÃO DO SISTEMA DE METAS */
+        .goals-system-card {
+            background: linear-gradient(135deg, rgba(229, 193, 88, 0.04) 0%, rgba(229, 193, 88, 0.01) 100%);
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid rgba(229, 193, 88, 0.15);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .goals-system-card:active { transform: scale(0.98); background: rgba(229, 193, 88, 0.06); }
+        .goals-header { display: flex; align-items: center; gap: 15px; }
+        .goals-icon-box {
+            width: 44px; height: 44px; background: rgba(229, 193, 88, 0.06);
+            border: 1px solid rgba(229, 193, 88, 0.25); border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--aeterna-gold); font-size: 1.2rem;
+        }
+
+        /* MODAL CENTRAL AETERNA CARREIRA */
+        .metas-screen-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #06070a; z-index: 20000; padding: 20px;
+            overflow-y: auto; display: none; padding-bottom: 40px;
+        }
+        .metas-screen-header {
+            display: flex; align-items: center; gap: 15px; margin-bottom: 25px;
+        }
+        .btn-back-profile {
+            width: 40px; height: 40px; border-radius: 12px; background: var(--card-glass);
+            border: 1px solid var(--card-border); color: white; display: flex;
+            align-items: center; justify-content: center; cursor: pointer;
+        }
+
+        /* ABAS INTERNAS */
+        .metas-tabs-nav {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            background: rgba(255,255,255,0.01); padding: 5px; border-radius: 14px;
+            border: 1px solid var(--card-border); margin-bottom: 25px;
+        }
+        .tab-btn {
+            padding: 13px; border: none; background: none; color: var(--text-muted);
+            font-weight: 700; font-size: 0.85rem; border-radius: 10px; cursor: pointer;
+            transition: 0.2s; text-align: center;
+        }
+        .tab-btn.active { background: var(--gold-gradient); color: #000; box-shadow: 0 4px 15px var(--gold-glow); }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* LISTA DE METAS */
+        .meta-reward-card {
+            background: var(--card-glass); border: 1px solid var(--card-border);
+            border-radius: 20px; padding: 18px; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .meta-info-side { display: flex; align-items: center; gap: 15px; }
+        .meta-badge-icon {
+            width: 42px; height: 42px; border-radius: 12px; display: flex;
+            align-items: center; justify-content: center; font-size: 1.1rem;
+        }
+        .meta-details h4 { font-size: 0.95rem; font-weight: 700; }
+        .meta-details p { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+        .meta-details span { font-size: 0.75rem; font-weight: 700; color: var(--green-success); display: block; margin-top: 4px; }
+        
+        .btn-claim-reward {
+            padding: 9px 15px; border-radius: 10px; border: none; font-size: 0.75rem;
+            font-weight: 700; cursor: pointer; color: #000; background: var(--gold-gradient);
+        }
+        .btn-claim-reward:disabled { background: rgba(255,255,255,0.04); color: var(--text-muted); cursor: not-allowed; }
+        .btn-claim-reward.claimed { background: rgba(16, 185, 129, 0.08); color: var(--green-success); border: 1px solid rgba(16, 185, 129, 0.2); }
+
+        /* LAYOUT RANKING LUXO */
+        .ranking-list-box { background: var(--card-glass); border: 1px solid var(--card-border); border-radius: 20px; overflow: hidden; }
+        .ranking-row {
+            display: flex; align-items: center; padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.02); justify-content: space-between;
+        }
+        .ranking-row:last-child { border-bottom: none; }
+        .rank-position { font-weight: 800; font-size: 0.9rem; width: 30px; color: var(--text-muted); }
+        .ranking-row:nth-child(1) .rank-position { color: #f59e0b; font-size: 1.1rem; }
+        .ranking-row:nth-child(2) .rank-position { color: #cbd5e1; font-size: 1.05rem; }
+        .ranking-row:nth-child(3) .rank-position { color: #b45309; font-size: 1rem; }
+        .rank-user-name { font-weight: 600; font-size: 0.9rem; flex-grow: 1; text-transform: capitalize; }
+        .rank-user-val { font-weight: 800; font-size: 0.9rem; color: var(--aeterna-gold); }
+
+        /* CÁPSULAS MODULARES DE MENU */
+        .menu-category-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin: 0 0 12px 8px;
+        }
+
+        .menu-group-box {
+            background: var(--card-glass);
+            border-radius: 20px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .menu-row-item {
+            display: flex;
+            align-items: center;
+            padding: 18px 20px;
+            color: #f1f5f9;
+            text-decoration: none;
+            transition: background 0.2s;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+        }
+        .menu-row-item:last-child { border-bottom: none; }
+        .menu-row-item:active { background: rgba(255,255,255,0.03); }
+
+        .menu-row-item .icon-wrapper {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: var(--aeterna-gold);
+            font-size: 0.95rem;
+        }
+
+        .menu-row-item.social-tg .icon-wrapper { 
+            color: var(--tg-blue); 
+            background: rgba(34, 158, 217, 0.05); 
+            border-color: rgba(34, 158, 217, 0.15);
+        }
+
+        .menu-row-item span { font-size: 0.9rem; font-weight: 600; }
+        .menu-row-item .chevron-right { margin-left: auto; color: #475569; font-size: 0.8rem; }
+
+        .btn-float-tg {
+            position: fixed; bottom: 95px; right: 20px;
+            width: 50px; height: 50px; background-color: var(--tg-blue);
+            color: #FFF; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
+            font-size: 1.3rem; box-shadow: 0px 8px 25px rgba(34, 158, 217, 0.3);
+            z-index: 999; text-decoration: none;
+            transition: 0.2s;
+        }
+        .btn-float-tg:active { transform: scale(0.9); }
+
+        /* BARRA DE NAVEGAÇÃO COMPACTA PREMIUM */
+        .nav-bottom { 
+            position: fixed; bottom: 0; left: 0; width: 100%; 
+            background: #06070a; display: flex; justify-content: space-around; 
+            padding: 10px 0; border-top: 1px solid var(--card-border); 
+            z-index: 10000; height: 75px; align-items: center;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .nav-item { 
+            color: var(--text-muted); text-align: center; text-decoration: none; flex: 1; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            gap: 4px; transition: color 0.2s;
+        }
+        .nav-item i { font-size: 1.25rem; }
+        .nav-item span { font-size: 0.65rem; font-weight: 500; }
+
+        .nav-item.active { color: white; }
+        .nav-item.active i { color: var(--aeterna-gold); text-shadow: 0 0 10px rgba(229, 193, 88, 0.4); }
+
+        .btn-logout-danger { 
+            width: 100%; padding: 16px; border-radius: 18px; 
+            border: 1px solid rgba(255, 77, 77, 0.15); background: rgba(255, 77, 77, 0.01); 
+            color: var(--red-danger); font-weight: 700; cursor: pointer;
+            font-size: 0.9rem; transition: 0.2s; margin-top: 10px;
+        }
+        .btn-logout-danger:active { background: rgba(255, 77, 77, 0.06); transform: scale(0.98); }
+
+        @keyframes pulse-gold {
+            0%, 100% { box-shadow: 0 0 5px rgba(229, 193, 88, 0.15); }
+            50% { box-shadow: 0 0 15px rgba(229, 193, 88, 0.4); }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="https://t.me/monety9220" target="_blank" class="btn-float-tg">
+        <i class="fab fa-telegram-plane"></i>
+    </a>
+
+    <div class="live-proof-banner animate__animated animate__fadeInDown">
+        <div class="live-proof-icon"></div>
+        <div id="live-proof-text">Conectando ao feed de transações Aeterna...</div>
+    </div>
+
+    <h1 class="page-title">Configurações<b>.</b></h1>
+
+    <div class="investor-card animate__animated animate__fadeInDown" style="animation-delay: 0.05s;">
+        <div class="card-header-user">
+            <div class="profile-avatar" id="user-avatar"><i class="fas fa-user"></i></div>
+            <div class="user-meta">
+                <h2 id="display-nome">...</h2>
+                <p id="display-email">carregando...</p>
+                <div class="rank-badge" id="rank-badge">Carregando Nível...</div>
+            </div>
+        </div>
+        <div class="card-balances-grid">
+            <div class="balance-block">
+                <small>Saldo Disponível</small>
+                <span id="stat-saldo">R$ 0,00</span>
+            </div>
+            <div class="balance-block" style="text-align: right;">
+                <small>Rede Ativa</small>
+                <span id="stat-indicados" style="color: #fff;"><i class="fas fa-users" style="font-size:0.85rem; margin-right:6px; color: var(--aeterna-gold);"></i>0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="career-card animate__animated animate__fadeInDown" style="animation-delay: 0.1s;">
+        <div class="career-header">
+            <small>Progresso de Carreira (Ativos)</small>
+            <span id="career-next-step">0/5 Indicações</span>
+        </div>
+        <div class="progress-capsule">
+            <div class="progress-bar-fill" id="career-progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="vault-card animate__animated animate__fadeInDown" style="animation-delay: 0.11s; border-color: rgba(16, 185, 129, 0.25);">
+        <div class="vault-header">
+            <div class="vault-icon-box" style="color: var(--green-success); background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2);"><i class="fas fa-ticket-alt"></i></div>
+            <div class="vault-title-meta">
+                <h3>Código Promocional</h3>
+                <p>Insira o código diário para ganhar bônus extras</p>
+            </div>
+        </div>
+        <div class="vault-status-box" style="gap: 10px;">
+            <input type="text" id="input-promo-code" placeholder="DIGITE O CÓDIGO AQUI" style="background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); padding: 10px 14px; border-radius: 10px; color: #fff; font-size: 0.8rem; width: 65%; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+            <button class="btn-vault-action" id="btn-redeem-promo" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); min-width: 85px;">Validar</button>
+        </div>
+    </div>
+
+    <div class="vault-card animate__animated animate__fadeInDown" style="animation-delay: 0.12s;">
+        <div class="vault-header">
+            <div class="vault-icon-box"><i class="fas fa-vault"></i></div>
+            <div class="vault-title-meta">
+                <h3>Cofre Forte Aeterna</h3>
+                <p>Tranque lucros por 7 dias e ganhe +15% bônus</p>
+            </div>
+        </div>
+        <div class="vault-status-box">
+            <div class="vault-timer" id="vault-timer-display">
+                <i class="fas fa-lock-open"></i> Cofre Vazio
+            </div>
+            <button class="btn-vault-action" id="btn-vault">Trancar Saldo</button>
+        </div>
+    </div>
+
+    <div class="goals-system-card animate__animated animate__fadeInDown" style="animation-delay: 0.14s;" id="btn-trigger-metas">
+        <div class="goals-header">
+            <div class="goals-icon-box"><i class="fas fa-trophy"></i></div>
+            <div>
+                <h3 style="font-size: 1rem; font-weight: 700;">Metas & Patentes</h3>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">Complete convites de ativos, ganhe bônus e veja o Ranking</p>
+            </div>
+        </div>
+        <i class="fas fa-chevron-right" style="color: var(--text-muted); font-size: 0.85rem;"></i>
+    </div>
+
+    <div class="menu-category-title">Operações Financeiras</div>
+    <div class="menu-group-box animate__animated animate__fadeInUp" style="animation-delay: 0.15s;">
+        <a href="deposito.html" class="menu-item menu-row-item">
+            <div class="icon-wrapper"><i class="fas fa-plus-circle"></i></div>
+            <span>Adicionar Fundos</span>
+            <i class="fas fa-chevron-right chevron-right"></i>
+        </a>
+        <a href="saque.html" class="menu-item menu-row-item">
+            <div class="icon-wrapper"><i class="fas fa-arrow-alt-circle-down"></i></div>
+            <span>Solicitar Saque</span>
+            <i class="fas fa-chevron-right chevron-right"></i>
+        </a>
+        <a href="transacoes.html" class="menu-item menu-row-item">
+            <div class="icon-wrapper"><i class="fas fa-exchange-alt"></i></div>
+            <span>Extrato de Movimentações</span>
+            <i class="fas fa-chevron-right chevron-right"></i>
+        </a>
+    </div>
+
+    <div class="menu-category-title">Suporte & Comunidade</div>
+    <div class="menu-group-box animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+        <a href="https://t.me/monety9220" target="_blank" class="menu-item menu-row-item social-tg">
+            <div class="icon-wrapper"><i class="fas fa-headset"></i></div>
+            <span>Atendimento ao Cliente</span>
+            <i class="fas fa-external-link-alt chevron-right"></i>
+        </a>
+        <a href="https://t.me/+qasEE92ROa5iOTYx" target="_blank" class="menu-item menu-row-item social-tg">
+            <div class="icon-wrapper"><i class="fas fa-bullhorn"></i></div>
+            <span>Canal do Telegram VIP</span>
+            <i class="fas fa-external-link-alt chevron-right"></i>
+        </a>
+    </div>
+
+    <button class="btn-logout-danger animate__animated animate__fadeInUp" style="animation-delay: 0.25s;" id="btnLogout">Desconectar da Conta</button>
+
+    <div class="metas-screen-overlay" id="metas-module-screen">
+        <div class="metas-screen-header">
+            <button class="btn-back-profile" id="btn-close-metas"><i class="fas fa-arrow-left"></i></button>
+            <h2 style="font-size: 1.3rem; font-weight: 800;">Central Aeterna Carreira<b>.</b></h2>
+        </div>
+
+        <div class="metas-tabs-nav">
+            <button class="tab-btn active" id="tab-trigger-goals">Metas & Patentes</button>
+            <button class="tab-btn" id="tab-trigger-ranking">Ranking Global</button>
+        </div>
+
+        <div class="tab-content active" id="content-goals">
+            <div id="metas-list-container">
+            </div>
+        </div>
+
+        <div class="tab-content" id="content-ranking">
+            <p style="font-size:0.75rem; color: var(--text-muted); margin-bottom:15px; padding-left:5px;">Top 10 investidores ativos com maior faturamento da rede:</p>
+            <div class="ranking-list-box" id="ranking-list-container">
+            </div>
+        </div>
+    </div>
+
+    <nav class="nav-bottom">
+        <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="planos.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Planos</span></a>
+        <a href="indicacao.html" class="nav-item"><i class="fas fa-share-alt"></i><span>Indicar</span></a>
+        <a href="perfil.html" class="nav-item active"><i class="fas fa-user-alt"></i><span>Perfil</span></a>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, collection, query, where, orderBy, limit, getDocs, arrayUnion, increment, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKDFw7khZzM9hIX7xbbrbFQeESiCLnmOw",
+            authDomain: "monety-site-9175f.firebaseapp.com",
+            projectId: "monety-site-9175f",
+            storageBucket: "monety-site-9175f.firebasestorage.app",
+            messagingSenderId: "840821848803",
+            appId: "1:840821848803:web:b99a5528e4bb925518a3d6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // VARIÁVEIS SEGURAS DE MAPA DE DADOS
+        let saldoPrincipal = 0;
+        let saldoLucro = 0;
+        let saldoGlobal = 0; 
+        
+        let currentUserUid = null;
+        let totalIndicadosGlobal = 0;
+        let metasResgatadas = [];
+
+        const configuracaoMetas = [
+            { id: "bronze", nome: "Patente Bronze", convites: 5, premio: 30.00, cor: "var(--rank-bronze)", icone: "fa-medal" },
+            { id: "prata", nome: "Patente Prata", convites: 15, premio: 150.00, cor: "var(--rank-prata)", icone: "fa-award" },
+            { id: "ouro", nome: "Patente Ouro", convites: 30, premio: 350.00, cor: "var(--rank-ouro)", icone: "fa-trophy" },
+            { id: "platina", nome: "Patente Platina", convites: 50, premio: 600.00, cor: "var(--rank-platina)", icone: "fa-crown" },
+            { id: "diamante", nome: "Patente Diamante Imortal", convites: 100, premio: 1500.00, cor: "var(--rank-diamante)", icone: "fa-gem" }
+        ];
+
+        // --- CONTROLES DE INTERFACE DO SISTEMA DE METAS (ABAS E MODAL) ---
+        const metasModal = document.getElementById('metas-module-screen');
+        document.getElementById('btn-trigger-metas').addEventListener('click', () => {
+            metasModal.style.display = 'block';
+            carregarDadosMetasERanking();
+        });
+        document.getElementById('btn-close-metas').addEventListener('click', () => {
+            metasModal.style.display = 'none';
+        });
+
+        const tabBtnGoals = document.getElementById('tab-trigger-goals');
+        const tabBtnRanking = document.getElementById('tab-trigger-ranking');
+        const contentGoals = document.getElementById('content-goals');
+        const contentRanking = document.getElementById('content-ranking');
+
+        tabBtnGoals.addEventListener('click', () => {
+            tabBtnGoals.classList.add('active');
+            tabBtnRanking.classList.remove('active');
+            contentGoals.classList.add('active');
+            contentRanking.classList.remove('active');
+        });
+
+        tabBtnRanking.addEventListener('click', () => {
+            tabBtnRanking.classList.add('active');
+            tabBtnGoals.classList.remove('active');
+            contentRanking.classList.add('active');
+            contentGoals.classList.remove('active');
+        });
+
+
+        // --- ENGINE DO FEED DE ATIVIDADES LIVE PROOF (FOMO) ---
+        const listaNomesFOMO = ["marcos_silva", "julia_resende", "felipe.lucros", "gabriel_aeterna", "ana_carol", "rafael_invest", "bruno_b", "amanda_m", "diego_stk"];
+        const listaAcoesFOMO = [
+            { txt: "acabou de ativar o CONTRATO VIP! ⚡", cor: "var(--aeterna-gold)" },
+            { txt: "solicitou um saque de R$ 320,00 via PIX! 💸", cor: "var(--green-success)" },
+            { txt: "recebeu R$ 45,00 de comissão de rede! 🎉", cor: "var(--aeterna-gold)" },
+            { txt: "trancou R$ 500,00 no Cofre Forte! 🔒", cor: "var(--aeterna-gold)" }
+        ];
+
+        function rodarFeedFOMO() {
+            const campoTexto = document.getElementById('live-proof-text');
+            setInterval(() => {
+                const nomeAleatorio = listaNomesFOMO[Math.floor(Math.random() * listaNomesFOMO.length)];
+                const acaoAleatoria = listaAcoesFOMO[Math.floor(Math.random() * listaAcoesFOMO.length)];
+                
+                campoTexto.style.opacity = 0;
+                setTimeout(() => {
+                    campoTexto.innerHTML = `Usuário <b>${nomeAleatorio}</b> ${acaoAleatoria.txt}`;
+                    campoTexto.style.opacity = 1;
+                }, 400);
+
+            }, 4500);
+        }
+        rodarFeedFOMO();
+
+
+        // --- CORREÇÃO DA ENGINE DO PLANO DE CARREIRA (SINCRONIZAÇÃO DAS METAS) ---
+        function atualizarPatenteCarreira(indicados) {
+            const avatar = document.getElementById('user-avatar');
+            const badge = document.getElementById('rank-badge');
+            const txtProgress = document.getElementById('career-next-step');
+            const barFill = document.getElementById('career-progress-bar');
+            
+            let patente = "Investidor Novato";
+            let corRank = "var(--rank-novato)";
+            let iconeRank = '<i class="fas fa-user"></i>';
+            let pct = 0;
+            let metaTexto = "";
+
+            if (indicados < 5) {
+                patente = "Investidor Novato";
+                corRank = "var(--rank-novato)";
+                iconeRank = '<i class="fas fa-user"></i>';
+                pct = (indicados / 5) * 100;
+                metaTexto = `${indicados} / 5 para Bronze`;
+            } else if (indicados >= 5 && indicados < 15) {
+                patente = "Líder Bronze";
+                corRank = "var(--rank-bronze)";
+                iconeRank = '<i class="fas fa-medal"></i>';
+                pct = ((indicados - 5) / 10) * 100;
+                metaTexto = `${indicados} / 15 para Prata`;
+            } else if (indicados >= 15 && indicados < 30) {
+                patente = "Líder Prata";
+                corRank = "var(--rank-prata)";
+                iconeRank = '<i class="fas fa-award"></i>';
+                pct = ((indicados - 15) / 15) * 100;
+                metaTexto = `${indicados} / 30 para Ouro`;
+            } else if (indicados >= 30 && indicados < 50) {
+                patente = "Líder Ouro";
+                corRank = "var(--rank-ouro)";
+                iconeRank = '<i class="fas fa-trophy"></i>';
+                pct = ((indicados - 30) / 20) * 100;
+                metaTexto = `${indicados} / 50 para Platina`;
+            } else {
+                patente = "Mestre Diamante";
+                corRank = "var(--rank-diamante)";
+                iconeRank = '<i class="fas fa-gem"></i>';
+                pct = 100;
+                metaTexto = "Nível Máximo Alcançado!";
+            }
+
+            badge.innerText = patente;
+            badge.style.color = corRank;
+            badge.style.borderColor = corRank;
+            badge.style.boxShadow = `0 0 10px ${corRank}33`;
+            
+            avatar.innerHTML = iconeRank;
+            avatar.style.color = corRank;
+            avatar.style.borderColor = corRank;
+            avatar.style.boxShadow = `0 0 15px ${corRank}4D`;
+
+            txtProgress.innerText = metaTexto;
+            barFill.style.width = `${pct}%`;
+        }
+
+// --- LÓGICA DE RESGATE DE CÓDIGO PROMOCIONAL ---
+document.getElementById('btn-redeem-promo').addEventListener('click', async () => {
+    const inputCodigo = document.getElementById('input-promo-code').value.trim().toUpperCase();
+    
+    if (!inputCodigo) {
+        Swal.fire({ icon: 'warning', title: 'Atenção', text: 'Por favor, digite um código promocional.', background: '#0c0d12', color: '#fff', confirmButtonColor: '#10b981' });
+        return;
+    }
+
+    if (!currentUserUid) {
+        Swal.fire({ icon: 'error', title: 'Aguarde', text: 'Sua sessão ainda está carregando. Tente novamente.', background: '#0c0d12', color: '#fff' });
+        return;
+    }
+
+    const btnRedeem = document.getElementById('btn-redeem-promo');
+    btnRedeem.disabled = true;
+    btnRedeem.innerText = "...";
+
+    try {
+        const promoRef = doc(db, "codigos_promocionais", inputCodigo);
+        const userRef = doc(db, "usuarios", currentUserUid);
+        const movimentoRef = doc(collection(db, "usuarios", currentUserUid, "movimentacoes"));
+        
+        const premioSorteado = await runTransaction(db, async (transaction) => {
+            const promoSnap = await transaction.get(promoRef);
+            
+            if (!promoSnap.exists()) {
+                throw "Código inválido ou expirado.";
+            }
+
+            const dadosPromo = promoSnap.data();
+
+            const mapearCampo = (obj, nomeChave) => {
+                return Object.keys(obj).find(k => k.toLowerCase() === nomeChave.toLowerCase()) || nomeChave;
+            };
+
+            const campoStatus = mapearCampo(dadosPromo, 'status');
+            const campoValor = mapearCampo(dadosPromo, 'valor');
+            const campoLimite = mapearCampo(dadosPromo, 'limiteUso');
+            const campoUsados = mapearCampo(dadosPromo, 'usadosCount');
+            const campoUsuarios = mapearCampo(dadosPromo, 'usuariosQueUsaram');
+
+            const statusCupom = String(dadosPromo[campoStatus] || "").toLowerCase();
+            if (statusCupom !== "ativo") {
+                throw "Este código promocional não está mais ativo.";
+            }
+
+            const limiteUso = dadosPromo[campoLimite] !== undefined ? Number(dadosPromo[campoLimite]) : 9999;
+            const usadosCount = Number(dadosPromo[campoUsados] || 0);
+            const usuariosQueUsaram = Array.isArray(dadosPromo[campoUsuarios]) ? dadosPromo[campoUsuarios] : [];
+
+            if (usuariosQueUsaram.includes(currentUserUid)) {
+                throw "Você já resgatou este código promocional!";
+            }
+
+            if (usadosCount >= limiteUso) {
+                throw "Este código promocional esgotou o limite de usos!";
+            }
+
+            const userSnap = await transaction.get(userRef);
+            if (!userSnap.exists()) {
+                throw "Perfil de usuário não localizado na base de dados.";
+            }
+
+            let valorPremio = dadosPromo[campoValor] !== undefined ? Number(dadosPromo[campoValor]) : Number((Math.random() * 0.9 + 0.1).toFixed(2));
+            const saldoAtualLucroUser = Number(userSnap.data().saldoLucro || 0);
+
+            const updateDadosPromo = {};
+            updateDadosPromo[campoUsados] = usadosCount + 1;
+            updateDadosPromo[campoUsuarios] = [...usuariosQueUsaram, currentUserUid];
+
+            transaction.update(promoRef, updateDadosPromo);
+            
+            transaction.update(userRef, {
+                saldoLucro: saldoAtualLucroUser + valorPremio
+            });
+
+            transaction.set(movimentoRef, {
+                tipo: "Bônus Promocional",
+                valor: valorPremio,
+                data: new Date().getTime(),
+                descricao: `Código validado: ${inputCodigo}`
+            });
+
+            return valorPremio;
+        });
+
+        saldoLucro += premioSorteado;
+        saldoGlobal = saldoPrincipal + saldoLucro;
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Código Resgatado!',
+            text: `Parabéns! Você ganhou R$ ${premioSorteado.toFixed(2)} adicionados ao seu saldo!`,
+            background: '#0c0d12',
+            color: '#fff',
+            confirmButtonColor: '#10b981'
+        });
+
+        document.getElementById('stat-saldo').innerText = `R$ ${saldoGlobal.toFixed(2)}`;
+        document.getElementById('input-promo-code').value = "";
+
+    } catch (erroMensagem) {
+        console.error("Erro no resgate:", erroMensagem);
+        const textoTratado = typeof erroMensagem === 'string' ? erroMensagem : "Erro ao processar código no banco de dados.";
+        Swal.fire({ icon: 'error', title: 'Falha no Resgate', text: textoTratado, background: '#0c0d12', color: '#fff', confirmButtonColor: '#ff4d4d' });
+    } finally {
+        btnRedeem.disabled = false;
+        btnRedeem.innerText = "Validar";
+    }
+});
+        // --- RENDERIZADOR DINÂMICO DO SISTEMA DE METAS & RANKING (CORRIGIDO) ---
+        async function carregarDadosMetasERanking() {
+            const containerMetas = document.getElementById('metas-list-container');
+            containerMetas.innerHTML = "";
+
+            configuracaoMetas.forEach(meta => {
+                const jaResgatado = metasResgatadas.includes(meta.id);
+                const completouMeta = totalIndicadosGlobal >= meta.convites;
+
+                let btnHtml = "";
+                if (jaResgatado) {
+                    btnHtml = `<button class="btn-claim-reward claimed" disabled><i class="fas fa-check-circle"></i> Resgatado</button>`;
+                } else if (completouMeta) {
+                    btnHtml = `<button class="btn-claim-reward" data-id="${meta.id}" data-premio="${meta.premio}" style="background: var(--gold-gradient); color: #000;">Resgatar R$ ${meta.premio.toFixed(2)}</button>`;
+                } else {
+                    btnHtml = `<button class="btn-claim-reward" disabled>${totalIndicadosGlobal}/${meta.convites}</button>`;
+                }
+
+                const cardMeta = document.createElement('div');
+                cardMeta.className = "meta-reward-card";
+                cardMeta.innerHTML = `
+                    <div class="meta-info-side">
+                        <div class="meta-badge-icon" style="background: rgba(255,255,255,0.01); border: 1px solid ${meta.cor}; color: ${meta.cor};">
+                            <i class="fas ${meta.icone}"></i>
+                        </div>
+                        <div class="meta-details">
+                            <h4>${meta.nome}</h4>
+                            <p>Meta: Convidar ${meta.convites} usuários ativos</p>
+                            <span style="color: var(--aeterna-gold);">Bônus: +R$ ${meta.premio.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <div>${btnHtml}</div>
+                `;
+                containerMetas.appendChild(cardMeta);
+            });
+
+            document.querySelectorAll('.btn-claim-reward:not([disabled])').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const idMeta = e.target.getAttribute('data-id');
+                    const premioMeta = Number(e.target.getAttribute('data-premio'));
+                    await processarResgatePremioMeta(idMeta, premioMeta);
+                });
+            });
+
+            const containerRanking = document.getElementById('ranking-list-container');
+            containerRanking.innerHTML = `<p style="text-align:center; padding:20px; font-size:0.8rem; color:var(--text-muted);">Processando dados da blockchain...</p>`;
+            
+            try {
+                const usuariosRef = collection(db, "usuarios");
+                // CORREÇÃO: Filtrando com "where('ativo', '==', true)" para que contas inativas sumam do ranking
+                const q = query(usuariosRef, where("ativo", "==", true), orderBy("saldoLucro", "desc"), limit(10));
+                const querySnapshot = await getDocs(q);
+                
+                containerRanking.innerHTML = "";
+                let posicao = 1;
+                
+                querySnapshot.forEach((docSnap) => {
+                    const dadosRank = docSnap.data();
+                    const nomeFormatado = dadosRank.nome || "Usuário Anônimo";
+                    const saldoRank = dadosRank.saldoLucro !== undefined ? Number(dadosRank.saldoLucro) : 0;
+
+                    const linhaRank = document.createElement('div');
+                    linhaRank.className = "ranking-row";
+                    linhaRank.innerHTML = `
+                        <div class="rank-position">#${posicao}</div>
+                        <div class="rank-user-name">${nomeFormatado}</div>
+                        <div class="rank-user-val">R$ ${saldoRank.toFixed(2)}</div>
+                    `;
+                    containerRanking.appendChild(linhaRank);
+                    posicao++;
+                });
+
+                if(posicao === 1) {
+                    containerRanking.innerHTML = `<p style="text-align:center; padding:20px; font-size:0.8rem; color:var(--text-muted);">Nenhum investidor ativo localizado.</p>`;
+                }
+            } catch(e) {
+                console.error("Erro ao computar ranking do firestore: ", e);
+                containerRanking.innerHTML = `<p style="text-align:center; padding:20px; font-size:0.8rem; color:var(--red-danger);">Erro ao carregar o ranking. Verifique os índices do Firestore.</p>`;
+            }
+        }
+
+        async function processarResgatePremioMeta(idMeta, valorPremio) {
+            try {
+                const userRef = doc(db, "usuarios", currentUserUid);
+                const novoSaldoLucro = saldoLucro + valorPremio;
+
+                await updateDoc(userRef, {
+                    saldoLucro: novoSaldoLucro,
+                    metasResgatadas: arrayUnion(idMeta)
+                });
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Patente Desbloqueada!',
+                    text: `Você resgatou com sucesso o bônus de R$ ${valorPremio.toFixed(2)} referente a esta meta!`,
+                    background: '#0c0d12',
+                    color: '#fff',
+                    confirmButtonColor: '#e5c158'
+                });
+
+                saldoLucro = novoSaldoLucro;
+                saldoGlobal = saldoPrincipal + saldoLucro;
+                metasResgatadas.push(idMeta);
+                
+                document.getElementById('stat-saldo').innerText = `R$ ${saldoGlobal.toFixed(2)}`;
+                carregarDadosMetasERanking();
+
+            } catch(e) {
+                console.error("Erro ao computar prêmio de meta:", e);
+                Swal.fire({ icon: 'error', title: 'Erro Operacional', text: 'Não foi possível processar seu resgate.', background: '#0c0d12', color: '#fff' });
+            }
+        }
+
+
+        // --- ENGINE DO COFRE FORTE (STAKING) COM REGRESSIVO ---
+        function gerenciarCofreInterface(dadosCofre) {
+            const displayTimer = document.getElementById('vault-timer-display');
+            const btnVault = document.getElementById('btn-vault');
+
+            if (dadosCofre && dadosCofre.ativo) {
+                btnVault.innerText = "Trancado";
+                btnVault.style.background = "rgba(255,255,255,0.03)";
+                btnVault.style.border = "1px solid rgba(255,255,255,0.08)";
+                btnVault.style.color = "var(--text-muted)";
+                btnVault.style.boxShadow = "none";
+                btnVault.disabled = true;
+
+                const fimStaking = dadosCofre.dataFim; 
+
+                const x = setInterval(() => {
+                    const agora = new Date().getTime();
+                    const distancia = fimStaking - agora;
+
+                    if (distancia < 0) {
+                        clearInterval(x);
+                        displayTimer.innerHTML = `<span style="color:var(--green-success)"><i class="fas fa-lock-open"></i> Concluído! R$ ${dadosCofre.valorFinal.toFixed(2)} liberado.</span>`;
+                    } else {
+                        const dias = Math.floor(distancia / (1000 * 60 * 60 * 24));
+                        const horas = Math.floor((distancia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((distancia % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((distancia % (1000 * 60)) / 1000);
+                        displayTimer.innerHTML = `<i class="fas fa-lock" style="color:var(--red-danger)"></i> R$ ${dadosCofre.valorTrancado.toFixed(2)} (${dias}d ${horas}h ${minutes}m ${seconds}s)`;
+                    }
+                }, 1000);
+            } else {
+                displayTimer.innerHTML = `<i class="fas fa-lock-open"></i> Cofre Disponível`;
+                btnVault.disabled = false;
+            }
+        }
+
+        document.getElementById('btn-vault').addEventListener('click', async () => {
+            if (saldoGlobal < 20) {
+                Swal.fire({ icon: 'error', title: 'Saldo Insuficiente', text: 'Você precisa de pelo menos R$ 20,00 de saldo livre para usar o Cofre.', background: '#0c0d12', color: '#fff' });
+                return;
+            }
+
+            const { value: valorTrancar } = await Swal.fire({
+                title: 'Trancar Saldo no Cofre',
+                text: `Digite o valor que deseja enviar ao cofre (Saldo Máx: R$ ${saldoGlobal.toFixed(2)}):`,
+                input: 'number',
+                inputAttributes: { min: 20, step: 1 },
+                showCancelButton: true,
+                confirmButtonColor: '#e5c158',
+                background: '#0c0d12',
+                color: '#fff',
+                confirmButtonText: 'Confirmar e Trancar 🔒'
+            });
+
+            if (valorTrancar) {
+                const valorNum = Number(valorTrancar);
+                if (valorNum > saldoGlobal || valorNum < 20) {
+                    Swal.fire({ icon: 'error', title: 'Valor inválido', text: 'Verifique se o valor não supera seu saldo disponível ou é menor que R$ 20.', background: '#0c0d12', color: '#fff' });
+                    return;
+                }
+
+                try {
+                    const userRef = doc(db, "usuarios", currentUserUid);
+                    const seteDiasEmMs = 7 * 24 * 60 * 60 * 1000;
+                    const objetoCofre = {
+                        ativo: true,
+                        valorTrancado: valorNum,
+                        valorFinal: valorNum * 1.15, 
+                        dataFim: new Date().getTime() + seteDiasEmMs
+                    };
+
+                    let deduzirSaldoPrincipal = saldoPrincipal;
+                    let deduzirSaldoLucro = saldoLucro;
+                    
+                    if (valorNum <= deduzirSaldoPrincipal) {
+                        deduzirSaldoPrincipal -= valorNum;
+                    } else {
+                        const restante = valorNum - deduzirSaldoPrincipal;
+                        deduzirSaldoPrincipal = 0;
+                        deduzirSaldoLucro -= restante;
+                    }
+
+                    await updateDoc(userRef, {
+                        saldo: deduzirSaldoPrincipal,
+                        saldoLucro: deduzirSaldoLucro, 
+                        cofreNexus: objetoCofre
+                    });
+
+                    Swal.fire({ icon: 'success', title: 'Cofre Trancado!', text: `Seus R$ ${valorNum.toFixed(2)} foram assegurados com sucesso e renderão +15%!`, background: '#0c0d12', color: '#fff' });
+                    setTimeout(() => location.reload(), 1500);
+
+                } catch (e) {
+                    console.error("Erro ao salvar dados no cofre", e);
+                }
+            }
+        });
+
+
+        // --- CARREGAMENTO DO USUÁRIO ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserUid = user.uid;
+                document.getElementById('display-email').innerText = user.email;
+                try {
+                    const userRef = doc(db, "usuarios", user.uid);
+                    const snap = await getDoc(userRef);
+                    if(snap.exists()){
+                        const d = snap.data();
+                        
+                        saldoPrincipal = d.saldo !== undefined ? Number(d.saldo) : 0;
+                        saldoLucro = d.saldoLucro !== undefined ? Number(d.saldoLucro) : 0;
+                        saldoGlobal = saldoPrincipal + saldoLucro;
+                        
+                        // Garante leitura limpa de indicados estritamente ativos
+                        totalIndicadosGlobal = d.indicadosAtivosCount !== undefined ? Number(d.indicadosAtivosCount) : 0; 
+                        
+                        metasResgatadas = d.metasResgatadas || [];
+
+                        document.getElementById('display-nome').innerText = d.nome || "Usuário";
+                        document.getElementById('stat-saldo').innerText = `R$ ${saldoGlobal.toFixed(2)}`;
+                        
+                        document.getElementById('stat-indicados').innerHTML = `<i class="fas fa-users" style="font-size:0.85rem; margin-right:6px; color: var(--aeterna-gold);"></i>${totalIndicadosGlobal}`;
+                        
+                        atualizarPatenteCarreira(totalIndicadosGlobal);
+                        gerenciarCofreInterface(d.cofreNexus);
+                    }
+                } catch (err) {
+                    console.error("Erro ao carregar perfil:", err);
+                }
+            } else { 
+                window.location.href = "index.html"; 
+            }
+        });
+
+        document.getElementById('btnLogout').addEventListener('click', async () => {
+            const result = await Swal.fire({
+                title: 'Sair da conta?',
+                text: "Você precisará fazer login novamente para acessar seus lucros.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                cancelButtonColor: 'rgba(255,255,255,0.03)',
+                confirmButtonText: 'Sim, sair',
+                cancelButtonText: 'Cancelar',
+                background: '#0c0d12',
+                color: '#fff'
+            });
+
+            if (result.isConfirmed) {
+                signOut(auth).then(() => {
+                    window.location.href = "index.html"; 
+                });
+            }
+        });
+    </script>
+</body>
+</html>

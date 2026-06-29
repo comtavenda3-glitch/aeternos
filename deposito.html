@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Saldo - Aeterna</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(180deg, #0c0d12 0%, #050508 100%);
+            --card-glass: rgba(255, 255, 255, 0.02);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --aeterna-gold: #e5c158;
+            --gold-gradient: linear-gradient(135deg, #f3c63f 0%, #b88728 100%);
+            --gold-glow: rgba(229, 193, 88, 0.12);
+            --text-gray: #94a3b8;
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Inter', sans-serif; 
+            outline: none !important; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body { 
+            background: var(--bg-gradient); 
+            color: #f8fafc; 
+            min-height: 100vh; 
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Orbes de Luz Ouro de Alta Performance */
+        .glowing-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(140px);
+            z-index: 1;
+            opacity: 0.05;
+            pointer-events: none;
+        }
+        .orb-1 { top: -10%; left: -10%; width: 450px; height: 450px; background: var(--aeterna-gold); }
+        .orb-2 { bottom: -10%; right: -10%; width: 500px; height: 500px; background: #b88728; }
+
+        .app-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 440px;
+            background: var(--card-glass);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            padding: 32px 24px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255,255,255,0.03);
+            margin-top: 10px;
+            animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .custom-nav-header { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 26px; 
+            gap: 16px; 
+        }
+        .custom-nav-header a { 
+            color: var(--text-gray); 
+            text-decoration: none; 
+            font-size: 1.1rem; 
+            transition: color 0.2s;
+        }
+        .custom-nav-header a:hover { color: #fff; }
+        .custom-nav-header span { font-weight: 700; font-size: 1.2rem; color: #fff; letter-spacing: -0.5px; }
+
+        .secure-alert-banner { 
+            background: rgba(229, 193, 88, 0.03); 
+            padding: 16px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(229, 193, 88, 0.12); 
+            margin-bottom: 26px; 
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+        .secure-alert-banner i { color: var(--aeterna-gold); font-size: 1.25rem; text-shadow: 0 0 10px rgba(229,193,88,0.2); }
+        .secure-alert-banner p { font-size: 0.82rem; color: #fef08a; line-height: 1.4; font-weight: 400; }
+
+        .scroll-amount-row { 
+            display: flex; 
+            gap: 8px; 
+            overflow-x: auto; 
+            padding-bottom: 10px;
+            margin-bottom: 24px;
+            scrollbar-width: none;
+        }
+        .scroll-amount-row::-webkit-scrollbar { display: none; }
+        
+        .chip-amount-select { 
+            background: rgba(255, 255, 255, 0.02); 
+            border: 1px solid var(--card-border); 
+            padding: 12px 22px; 
+            white-space: nowrap;
+            border-radius: 100px; 
+            cursor: pointer; 
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-gray);
+            transition: all 0.2s ease;
+        }
+        .chip-amount-select:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+        .chip-amount-select.active { 
+            border-color: var(--aeterna-gold); 
+            color: #000; 
+            background: var(--gold-gradient); 
+            box-shadow: 0 4px 15px var(--gold-glow);
+            font-weight: 700;
+        }
+
+        .digital-teller-display { 
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 22px;
+            margin-bottom: 26px; 
+            text-align: center;
+        }
+        .digital-teller-display label { 
+            display: block; 
+            margin-bottom: 10px; 
+            font-size: 0.72rem; 
+            color: var(--text-gray); 
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+        }
+        
+        .teller-input-box { 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+        .teller-input-box .currency-label { 
+            font-size: 2.1rem;
+            font-weight: 800;
+            color: var(--aeterna-gold); 
+            margin-right: 8px;
+            text-shadow: 0 0 20px rgba(229,193,88,0.2);
+        }
+
+        .digital-teller-display input { 
+            width: 65%; 
+            background: transparent; 
+            border: none; 
+            color: white; 
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: left;
+        }
+
+        #qr-container {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        #qr-container h2 { font-size: 1.3rem; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+        
+        .qr-image-wrapper {
+            position: relative;
+            display: inline-block;
+            margin: 24px 0;
+            background: #fff;
+            padding: 14px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        }
+        .qr-image-wrapper img {
+            width: 180px; 
+            height: 180px;
+            display: block;
+        }
+        /* Scanner Laser Premium Ouro */
+        .qr-image-wrapper::after {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; width: 100%; height: 2px;
+            background: var(--aeterna-gold);
+            box-shadow: 0 0 10px var(--aeterna-gold);
+            animation: laserScan 2.5s linear infinite;
+        }
+        @keyframes laserScan {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+        
+        .hash-code-container {
+            background: rgba(0, 0, 0, 0.4); 
+            padding: 16px; 
+            border-radius: 14px;
+            font-size: 0.75rem; 
+            word-break: break-all; 
+            border: 1px solid var(--card-border);
+            margin-bottom: 24px; 
+            color: var(--text-gray); 
+            line-height: 1.5;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .btn-core-action { 
+            width: 100%; 
+            padding: 18px; 
+            border-radius: 16px; 
+            border: none; 
+            background: var(--gold-gradient); 
+            color: #000; 
+            font-weight: 800; 
+            font-size: 0.95rem; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            margin-bottom: 12px;
+            box-shadow: 0 6px 20px var(--gold-glow);
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-core-action:hover:not(:disabled) {
+            opacity: 0.95;
+            box-shadow: 0 8px 25px rgba(229, 193, 88, 0.25);
+        }
+        .btn-core-action:active:not(:disabled) { transform: scale(0.98); }
+        .btn-core-action:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+        .btn-dismiss {
+            background: rgba(255, 255, 255, 0.02) !important;
+            border: 1px solid var(--card-border) !important;
+            color: #e4e4e7 !important;
+            box-shadow: none !important;
+            margin-top: 6px;
+        }
+        .btn-dismiss:hover { background: rgba(255, 255, 255, 0.05) !important; color: #fff !important; }
+    </style>
+</head>
+<body>
+
+    <div class="glowing-orb orb-1"></div>
+    <div class="glowing-orb orb-2"></div>
+
+    <div class="app-container">
+        <div id="deposito-screen">
+            <div class="custom-nav-header">
+                <a href="home.html"><i class="fas fa-arrow-left"></i></a>
+                <span>Adicionar Saldo</span>
+            </div>
+
+            <div class="secure-alert-banner">
+                <i class="fas fa-shield-halved"></i>
+                <p>O aporte mínimo operacional é de <b>R$ 35,00</b>. Transações PIX passam por checkout automático e creditam em segundos.</p>
+            </div>
+
+            <div class="scroll-amount-row">
+                <div class="chip-amount-select active" onclick="setAmount(35, this)">R$ 35</div>
+                <div class="chip-amount-select" onclick="setAmount(50, this)">R$ 50</div>
+                <div class="chip-amount-select" onclick="setAmount(100, this)">R$ 100</div>
+                <div class="chip-amount-select" onclick="setAmount(150, this)">R$ 150</div>
+                <div class="chip-amount-select" onclick="setAmount(500, this)">R$ 500</div>
+                <div class="chip-amount-select" onclick="setAmount(1000, this)">R$ 1000</div>
+            </div>
+
+            <div class="digital-teller-display">
+                <label>Defina o montante de transferência</label>
+                <div class="teller-input-box">
+                    <span class="currency-label">R$</span>
+                    <input type="number" id="deposito-valor" value="35" placeholder="35.00">
+                </div>
+            </div>
+
+            <button class="btn-core-action" id="btn-gerar" onclick="processarDeposito()">
+                <i class="fas fa-bolt"></i> EMITIR CHAVE PIX
+            </button>
+        </div>
+
+        <div id="qr-container">
+            <h2>Ordem de Pagamento Gerada</h2>
+            <p style="font-size: 0.85rem; color: var(--text-gray); margin-top: 4px;">Escaneie o QR Code abaixo</p>
+            
+            <div class="qr-image-wrapper">
+                <img id="qr-img" src="" alt="QR Code">
+            </div>
+            
+            <div class="hash-code-container" id="pix-copy-text">Sincronizando hash de pagamento...</div>
+            
+            <button class="btn-core-action" onclick="copiarPix()">
+                <i class="fas fa-copy"></i> COPIAR CÓDIGO PIX
+            </button>
+            <button class="btn-core-action btn-dismiss" onclick="location.reload()">
+                <i class="fas fa-rotate-left"></i> CANCELAR SOLICITAÇÃO
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, increment, collection, query, where, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKDFw7khZzM9hIX7xbbrbFQeESiCLnmOw",
+            authDomain: "monety-site-9175f.firebaseapp.com",
+            projectId: "monety-site-9175f",
+            storageBucket: "monety-site-9175f.firebasestorage.app",
+            messagingSenderId: "840821848803",
+            appId: "1:840821848803:web:b99a5528e4bb925518a3d6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let pixGlobal = "";
+        let uidUsuario = null;
+        let emailUsuario = null;
+        let nomeUsuario = "Membro Aeterna"; 
+        let unsubscribeHistorico = null;
+        
+        const urlPipedream = 'https://eom5l7ta9zssef4.m.pipedream.net';
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                uidUsuario = user.uid;
+                emailUsuario = user.email;
+                const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+                if(userDoc.exists()) {
+                    nomeUsuario = userDoc.data().nome || "Membro Aeterna";
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        window.setAmount = function(valor, element) {
+            document.getElementById('deposito-valor').value = valor;
+            document.querySelectorAll('.chip-amount-select').forEach(opt => opt.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function monitorarHistoricoDepot() {
+            const historicoRef = collection(db, "historico");
+            const q = query(
+                historicoRef,
+                where("userId", "==", uidUsuario),
+                where("tipo", "==", "Depósito"),
+                orderBy("data", "desc"),
+                limit(1)
+            );
+
+            const horaGeracaoPix = new Date();
+
+            unsubscribeHistorico = onSnapshot(q, async (snapshot) => {
+                for (const change of snapshot.docChanges()) {
+                    if (change.type === "added") {
+                        const dados = change.doc.data();
+                        
+                        const dataFirestore = dados.data 
+                            ? (dados.data.toDate ? dados.data.toDate() : new Date(dados.data)) 
+                            : new Date();
+
+                        if (dataFirestore >= horaGeracaoPix) {
+                            if (unsubscribeHistorico) unsubscribeHistorico();
+                            
+                            try {
+                                const userRef = doc(db, "usuarios", uidUsuario);
+                                await updateDoc(userRef, {
+                                    girosRoleta: increment(1)
+                                });
+                                
+                                exibirSucessoFina(dados.valor);
+                            } catch (error) {
+                                console.error("Erro ao creditar giro bônus: ", error);
+                                exibirSucessoFina(dados.valor);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function exibirSucessoFina(valor) {
+            const userDoc = await getDoc(doc(db, "usuarios", uidUsuario));
+            const saldoFinal = userDoc.exists() ? userDoc.data().saldo : 0;
+
+            Swal.fire({
+                title: 'DEPÓSITO CONFIRMADO!',
+                html: `
+                    <div style="padding: 10px; color: #fff; text-align: center;">
+                        <i class="fas fa-check-circle" style="font-size: 3rem; color: #e5c158; margin-bottom: 15px; text-shadow: 0 0 20px rgba(229,193,88,0.3);"></i>
+                        <p style="font-size: 1.1rem; margin-bottom: 10px;">Recebemos seu PIX de <b>R$ ${valor.toFixed(2)}</b></p>
+                        <p style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 15px;">Seu saldo operacional foi atualizado para:</p>
+                        <h2 style="color: #e5c158; margin-bottom: 20px;">R$ ${saldoFinal.toFixed(2)}</h2>
+                        <div style="background: rgba(229, 193, 88, 0.05); border: 1px dashed #e5c158; padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <i class="fas fa-star" style="color: #e5c158;"></i>
+                            <span style="font-size: 0.85rem; color: #fff; font-weight: 600;">+1 GIRO EXTRA DISPONÍVEL NA ROLETA!</span>
+                        </div>
+                    </div>
+                `,
+                background: '#0c0d12',
+                color: '#fff',
+                confirmButtonColor: '#e5c158',
+                confirmButtonText: 'IR PARA O PAINEL',
+                allowOutsideClick: false,
+                backdrop: `rgba(0,0,0,0.85)`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "home.html";
+                }
+            });
+        }
+
+        window.processarDeposito = async function() {
+            const valorInput = document.getElementById('deposito-valor');
+            const valor = parseFloat(valorInput.value);
+            const btn = document.getElementById('btn-gerar');
+
+            if (isNaN(valor) || valor < 1) {
+                return Swal.fire({ icon: 'error', title: 'Valor Mínimo', text: 'O valor mínimo para depósito é de R$ 35,00', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> GERANDO CHAVE...';
+
+            try {
+                const response = await fetch(urlPipedream, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        amount: valor,
+                        userId: uidUsuario,
+                        userName: nomeUsuario,
+                        type: 'deposito_pix'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('deposito-screen').style.display = 'none';
+                    document.getElementById('qr-container').style.display = 'block';
+
+                    pixGlobal = data.pix_code; 
+                    document.getElementById('pix-copy-text').innerText = pixGlobal;
+                    document.getElementById('qr-img').src = data.qr_image; 
+
+                    monitorarHistoricoDepot();
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Erro', text: 'Falha ao gerar PIX.', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-bolt"></i> EMITIR CHAVE PIX';
+            }
+        }
+
+        window.copiarPix = function() {
+            if(!pixGlobal) return;
+            navigator.clipboard.writeText(pixGlobal).then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Código Copiado!',
+                    text: 'Efetue a transferência no app do seu banco.',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    background: '#0c0d12',
+                    color: '#fff'
+                });
+            });
+        }
+    </script>
+</body>
+</html>

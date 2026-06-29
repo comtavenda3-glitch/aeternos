@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ambiente de Testes - Nexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            background: linear-gradient(180deg, #060b19 0%, #020408 100%);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .test-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            padding: 30px;
+            border-radius: 24px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        h2 { font-size: 1.5rem; margin-bottom: 10px; font-weight: 800; color: #ffd700; }
+        p { font-size: 0.85rem; color: #94a3b8; margin-bottom: 25px; }
+        .form-group { text-align: left; margin-bottom: 20px; }
+        label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #cbd5e1; font-weight: 600; display: block; margin-bottom: 8px; }
+        input, select {
+            width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; color: white; font-weight: 600; font-size: 0.9rem;
+        }
+        button {
+            width: 100%; padding: 15px; background: linear-gradient(135deg, #0052ff 0%, #003db3 100%);
+            border: none; border-radius: 12px; color: white; font-weight: 800; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 82, 255, 0.3); transition: 0.2s; font-size: 0.95rem; margin-top: 10px;
+        }
+        button:active { transform: scale(0.97); }
+    </style>
+</head>
+<body>
+
+    <div class="test-container">
+        <h2>Simulador de Ativação & Ranking 🧪</h2>
+        <p>Injete depósitos para validar usuários ativos, atualizar comissões e testar a atualização do Ranking Global.</p>
+
+        <div class="form-group">
+            <label>Selecione o Usuário para Depositar</label>
+            <select id="select-users">
+                <option value="">Autenticando sessão segura...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Valor do Depósito Comercial (R$)</label>
+            <input type="number" id="test-amount" value="50.00" placeholder="Ex: 50.00">
+        </div>
+
+        <button id="btn-simulate">Processar Depósito e Ativar no Ranking</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, addDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKDFw7khZzM9hIX7xbbrbFQeESiCLnmOw",
+            authDomain: "monety-site-9175f.firebaseapp.com",
+            projectId: "monety-site-9175f",
+            storageBucket: "monety-site-9175f.firebasestorage.app",
+            messagingSenderId: "840821848803",
+            appId: "1:840821848803:web:b99a5528e4bb925518a3d6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let usuarioLogadoUid = "";
+
+      // Detecta automaticamente se você já está logado no sistema
+        async function inicializarAmbiente() {
+            const select = document.getElementById('select-users');
+            
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    console.log("Sessão ativa detectada:", user.email);
+                    // Verifica se é o admin cadastrado nas suas regras
+                    if (user.email === "lipedosantos2008@gmail.com") {
+                        console.log("Permissões de administrador validadas.");
+                        carregarListaUsuarios();
+                    } else {
+                        console.warn("Usuário logado não é o administrador master.");
+                        // Tenta carregar mesmo assim caso as regras permitam
+                        carregarListaUsuarios();
+                    }
+                } else {
+                    console.error("Nenhum usuário logado detectado.");
+                    select.innerHTML = `<option value="">Por favor, faça login no app primeiro</option>`;
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Acesso Não Autenticado',
+                        text: 'Entre na sua conta de administrador na plataforma principal deste mesmo navegador antes de abrir o simulador.',
+                        background: '#060b19',
+                        color: '#fff',
+                        confirmButtonColor: '#0052ff'
+                    });
+                }
+            });
+        }
+
+        // Carrega os usuários direto do Firestore após estar logado
+        async function carregarListaUsuarios() {
+            const select = document.getElementById('select-users');
+            try {
+                const snap = await getDocs(collection(db, "usuarios"));
+                select.innerHTML = "";
+                
+                if(snap.empty) {
+                    select.innerHTML = `<option value="">Nenhum usuário encontrado</option>`;
+                    return;
+                }
+
+                snap.forEach(userDoc => {
+                    const d = userDoc.data();
+                    const status = d.ativo ? "🟢 Ativo (Rank)" : "🔴 Inativo (Oculto)";
+                    const option = document.createElement('option');
+                    option.value = userDoc.id;
+                    option.innerText = `${d.nome || 'Sem Nome'} (${status}) - ...${userDoc.id.substring(0,6)}`;
+                    select.appendChild(option);
+                });
+                
+                usuarioLogadoUid = select.value;
+                select.addEventListener('change', (e) => { usuarioLogadoUid = e.target.value; });
+
+            } catch (err) {
+                console.error("Erro ao listar usuários:", err);
+                select.innerHTML = `<option value="">Erro de permissão insuficiente</option>`;
+            }
+        }
+        
+        // Inicia o fluxo de bypass de segurança
+        inicializarAmbiente();
+
+        // Processamento do Clique de Simulação
+        document.getElementById('btn-simulate').addEventListener('click', async () => {
+            const valorDeposito = parseFloat(document.getElementById('test-amount').value);
+            if (!usuarioLogadoUid) {
+                return Swal.fire("Atenção", "Selecione um usuário válido da lista.", "warning");
+            }
+            if (isNaN(valorDeposito) || valorDeposito <= 0) {
+                return Swal.fire("Erro", "Insira um valor de depósito válido", "error");
+            }
+
+            Swal.fire({
+                title: 'Injetando no Banco...',
+                text: 'Atualizando saldos, definindo flag ativo:true e rodando comissões da árvore...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const userRef = doc(db, "usuarios", usuarioLogadoUid);
+                const userSnap = await getDoc(userRef);
+                
+                if (!userSnap.exists()) throw new Error("Usuário alvo não localizado.");
+                const userData = userSnap.data();
+
+                const jaEraAtivo = userData.ativo === true;
+
+                // 1. Atualização do Usuário Alvo
+                await updateDoc(userRef, {
+                    saldoLucro: increment(valorDeposito),
+                    ativo: true, 
+                    giros: increment(1),
+                    girosRoleta: increment(1)
+                });
+
+                // Registra movimentação de histórico
+                await addDoc(collection(db, "usuarios", usuarioLogadoUid, "movimentacoes"), {
+                    tipo: "Depósito Aprovado",
+                    valor: valorDeposito,
+                    data: new Date().getTime(),
+                    descricao: "Simulação de aporte com ativação automática"
+                });
+
+                // 2. Processamento da Rede de Indicação (3 Níveis)
+                let atualIndicadorUid = userData.indicadoPor || null;
+                
+                const niveisConfig = [
+                    { nivel: 1, porc: 0.20, label: "1ª Geração" },
+                    { nivel: 2, porc: 0.05, label: "2ª Geração" },
+                    { nivel: 3, porc: 0.01, label: "3ª Geração" }
+                ];
+
+                let resumoLogs = "";
+
+                for (let i = 0; i < niveisConfig.length; i++) {
+                    if (!atualIndicadorUid || atualIndicadorUid.trim() === "") break;
+
+                    const config = niveisConfig[i];
+                    const patrocinadorRef = doc(db, "usuarios", atualIndicadorUid);
+                    const patrocinadorSnap = await getDoc(patrocinadorRef);
+
+                    if (patrocinadorSnap.exists()) {
+                        const dadosPatrocinador = patrocinadorSnap.data();
+                        const valorComissao = valorDeposito * config.porc;
+
+                        let alteracoesPatrocinador = {
+                            saldoLucro: increment(valorComissao),
+                            totalComissoes: increment(valorComissao)
+                        };
+
+                        if (!jaEraAtivo) {
+                            if (config.nivel === 1) {
+                                alteracoesPatrocinador.indicadosAtivosCount = increment(1);
+                            }
+                            alteracoesPatrocinador.ativosNaRede = increment(1);
+                        }
+
+                        await updateDoc(patrocinadorRef, alteracoesPatrocinador);
+
+                        await addDoc(collection(db, "usuarios", atualIndicadorUid, "movimentacoes"), {
+                            tipo: `Comissão ${config.label}`,
+                            valor: valorComissao,
+                            data: new Date().getTime(),
+                            descricao: `Recebido do convidado ativo: ${userData.nome || "Usuário de Teste"}`
+                        });
+
+                        resumoLogs += `<br><b>${config.label}:</b> UID (...${atualIndicadorUid.substring(0,6)}) recebeu R$ ${valorComissao.toFixed(2)}`;
+                        
+                        atualIndicadorUid = dadosPatrocinador.indicadoPor || null;
+                    } else {
+                        break;
+                    }
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Injeção Concluída!',
+                    html: `Conta atualizada para <b>Ativa</b>.<br>Depósito de R$ ${valorDeposito.toFixed(2)} lançado e elegível ao Ranking.<br><b style="color: #00e676">+1 Giro adicionado à roleta!</b><br>${resumoLogs === "" ? "<br><i>Sem patrocinadores acima.</i>" : "<br>" + resumoLogs}`,
+                    background: '#060b19',
+                    color: '#fff',
+                    confirmButtonColor: '#0052ff'
+                }).then(() => {
+                    carregarListaUsuarios();
+                });
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire("Falha na Operação", error.message, "error");
+            }
+        });
+    </script>
+</body>
+</html>
