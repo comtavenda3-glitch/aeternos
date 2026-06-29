@@ -262,12 +262,12 @@
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="options-container" id="options-list">
-                    <div class="option" data-value="cpf">CPF</div>
-                    <div class="option" data-value="email">E-mail</div>
-                    <div class="option" data-value="phone">Telefone (Celular)</div>
-                    <div class="option" data-value="evp">Chave Aleatória (EVP)</div>
+                    <div class="option" data-value="CPF">CPF</div>
+                    <div class="option" data-value="E-mail">E-mail</div>
+                    <div class="option" data-value="Telefone">Telefone (Celular)</div>
+                    <div class="option" data-value="Chave Aleatória">Chave Aleatória (EVP)</div>
                 </div>
-                <input type="hidden" id="pix-type" value="cpf">
+                <input type="hidden" id="pix-type" value="CPF">
             </div>
         </div>
 
@@ -292,7 +292,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, increment, addDoc, collection, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDKDFw7khZzM9hIX7xbbrbFQeESiCLnmOw",
@@ -309,6 +309,7 @@
 
         let uidAtual = null;
         let saldoAtual = 0;
+        let userDataGlobal = null;
 
         const selectBtn = document.getElementById('select-btn');
         const optionsList = document.getElementById('options-list');
@@ -340,17 +341,16 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 uidAtual = user.uid;
-                await carregarSaldo();
+                // Monitora o saldo em tempo real
+                onSnapshot(doc(db, "usuarios", uidAtual), (snap) => {
+                    if (snap.exists()) {
+                        userDataGlobal = snap.data();
+                        saldoAtual = Number(userDataGlobal.saldoLucro) || 0;
+                        document.getElementById('current-balance').innerText = `R$ ${saldoAtual.toFixed(2)}`;
+                    }
+                });
             } else { window.location.href = "login.html"; }
         });
-
-        async function carregarSaldo() {
-            const userDoc = await getDoc(doc(db, "usuarios", uidAtual));
-            if(userDoc.exists()) {
-                saldoAtual = Number(userDoc.data().saldoLucro) || 0;
-                document.getElementById('current-balance').innerText = `R$ ${saldoAtual.toFixed(2)}`;
-            }
-        }
 
         document.getElementById('saque-amount').addEventListener('input', (e) => {
             const val = parseFloat(e.target.value) || 0;
@@ -361,23 +361,11 @@
         });
 
         document.getElementById('btnPerformSaque').addEventListener('click', async () => {
-            const agora = new Date();
-            const hora = agora.getHours();
-            
-            if (hora < 9 || hora >= 18) {
-                return Swal.fire({ 
-                    icon: 'warning', 
-                    title: 'Horário Indisponível', 
-                    text: 'Os saques só podem ser realizados entre 09:00 e 18:00.', 
-                    background: '#0c0d12', 
-                    color: '#fff',
-                    confirmButtonColor: '#e5c158'
-                });
-            }
+            // REMOVIDO TOTALMENTE O BLOQUEIO DE 7 DIAS E DE HORÁRIOS
 
             const valorSaque = parseFloat(document.getElementById('saque-amount').value);
-            const chavePix = document.getElementById('pix-key').value;
-            const tipoPix = document.getElementById('pix-type').value;
+            const chavePix = document.getElementById('pix-key').value.trim();
+            const tipoPix = hiddenInput.value;
 
             if (!chavePix) {
                 return Swal.fire({ icon: 'error', title: 'Atenção', text: 'Insira sua chave PIX.', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
@@ -403,32 +391,46 @@
             Swal.fire({ title: 'Processando...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0c0d12', color: '#fff' });
 
             try {
-                // Chamada segura para o servidor Pipedream
-                const response = await fetch("https://eo9elnupivtomta.m.pipedream.net", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        userId: uidAtual,
-                        amount: valorSaque,
-                        pixKey: chavePix,
-                        pixType: tipoPix
-                    })
+                // 1. Deduz o saldo do usuário imediatamente
+                const userRef = doc(db, "usuarios", uidAtual);
+                await updateDoc(userRef, {
+                    saldoLucro: increment(-valorSaque)
                 });
 
-                const resultado = await response.json();
+                // 2. Cria o documento de solicitação na coleção global "saques" para o Admin aprovar
+                await addDoc(collection(db, "saques"), {
+                    userId: uidAtual,
+                    nomeUsuario: userDataGlobal?.nome || "Usuário",
+                    emailUsuario: userDataGlobal?.email || "",
+                    valor: valorSaque,
+                    chavePix: chavePix,
+                    tipoPix: tipoPix,
+                    status: "pendente", 
+                    dataSolicitacao: Timestamp.now()
+                });
 
-                if (resultado.success) {
-                    await Swal.fire({ icon: 'success', title: 'Sucesso!', text: 'Solicitação de saque enviada!', timer: 2500, showConfirmButton: false, background: '#0c0d12', color: '#fff' });
-                    window.location.href = "home.html";
-                } else {
-                    throw new Error(resultado.error);
-                }
+                // 3. Adiciona a movimentação correspondente no extrato do usuário
+                await addDoc(collection(db, "historico"), {
+                    userId: uidAtual,
+                    valor: -valorSaque,
+                    tipo: 'Saque Pendente',
+                    descricao: `Solicitação de saque via PIX (${tipoPix}) enviada para análise`,
+                    data: Timestamp.now()
+                });
+
+                await Swal.fire({ icon: 'success', title: 'Sucesso!', text: 'Solicitação de saque enviada para o administrador!', timer: 2500, showConfirmButton: false, background: '#0c0d12', color: '#fff' });
+                window.location.href = "home.html";
 
             } catch (error) {
-                console.error(error);
-                Swal.fire({ icon: 'error', title: 'Erro no Saque', text: error.message || 'Ocorreu um erro ao processar. Tente novamente.', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
+                console.error("Erro ao registrar saque:", error);
+                
+                // Estorno em caso de falha de conexão
+                try {
+                    const userRef = doc(db, "usuarios", uidAtual);
+                    await updateDoc(userRef, { saldoLucro: increment(valorSaque) });
+                } catch(err) { console.error(err); }
+
+                Swal.fire({ icon: 'error', title: 'Erro no Saque', text: 'Ocorreu um erro ao processar. Tente novamente.', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
                 btn.disabled = false;
             }
         });
