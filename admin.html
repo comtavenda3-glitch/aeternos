@@ -323,7 +323,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Código Ativado!',
-                    text: `O cupom "${idCupom}" (R$ ${parseFloat(valorBonus).toFixed(2)}) foi salvo no banco e está pronto para uso!`,
+                    text: `O cupom "${idCupom}" (R$ ${parseFloat(valorBonus).toFixed(2)}) foi saved no banco e está pronto para uso!`,
                     background: '#0c0d12',
                     color: '#fff',
                     confirmButtonColor: '#e5c158'
@@ -373,7 +373,7 @@
             if (isNaN(valor)) return Toast.fire({ icon: 'error', title: 'Valor inválido' });
             try {
                 await setDoc(doc(db, "configuracoes", "bonus_cadastro"), { valor: valor, atualizadoEm: new Date() });
-                Toast.fire({ icon: 'success', title: 'Bônus atualizado!' });
+                Toast.fire({ icon: 'success', title: 'Bônus updated!' });
             } catch (e) { Toast.fire({ icon: 'error', title: 'Erro ao salvar' }); }
         });
 
@@ -545,6 +545,7 @@
                                     amount: parseFloat(s.valorReceber),
                                     pixKey: s.chavePix,
                                     saqueId: id,
+                                    userId: s.userId, // ✨ ATUALIZADO: userId incluído com sucesso para validação no Pipedream
                                     email: s.email || 'Não informado'
                                 })
                             });
