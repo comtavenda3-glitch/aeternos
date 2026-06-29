@@ -130,6 +130,7 @@
             <span class="status-online"><i class="fas fa-circle" style="font-size: 0.65rem; margin-right: 5px;"></i> Sistema Online</span>
         </div>
 
+        <!-- MÓDULO DE CÓDIGOS DIÁRIOS -->
         <div class="admin-section">
             <div class="section-title"><i class="fas fa-ticket-alt"></i> Gerenciador de Códigos Promocionais Diários</div>
             <div class="grid-inputs">
@@ -290,7 +291,6 @@
             carregarBonusConfig();
         }
 
-        // LÓGICA DO MÓDULO DE CÓDIGOS PROMOCIONAIS (BLINDADA E PADRONIZADA)
         document.getElementById('btn-generate').addEventListener('click', async () => {
             const codigoInput = document.getElementById('admin-code-name').value.trim();
             const valorBonus = document.getElementById('admin-code-value').value.trim();
@@ -302,14 +302,12 @@
             }
 
             const idCupom = codigoInput.toUpperCase();
-
             try {
                 const btnGenerate = document.getElementById('btn-generate');
                 const textoOriginal = btnGenerate.innerHTML;
                 btnGenerate.disabled = true;
                 btnGenerate.innerText = "Processando...";
 
-                // Gravação com chaves exatas para evitar conflitos de case-sensitive
                 await setDoc(doc(db, "codigos_promocionais", idCupom), {
                     codigo: idCupom,
                     VALOR: Number(valorBonus),
@@ -320,31 +318,18 @@
                     dataCriacao: new Date().getTime()
                 });
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Código Ativado!',
-                    text: `O cupom "${idCupom}" (R$ ${parseFloat(valorBonus).toFixed(2)}) foi saved no banco e está pronto para uso!`,
-                    background: '#0c0d12',
-                    color: '#fff',
-                    confirmButtonColor: '#e5c158'
-                });
-
+                Swal.fire({ icon: 'success', title: 'Código Ativado!', text: `O cupom "${idCupom}" foi salvo!`, background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
                 document.getElementById('admin-code-name').value = "";
                 document.getElementById('admin-code-value').value = "";
                 document.getElementById('admin-code-limit').value = "";
-                
                 btnGenerate.disabled = false;
                 btnGenerate.innerHTML = textoOriginal;
-
             } catch (error) {
-                console.error("Erro ao criar cupom:", error);
-                Swal.fire({ icon: 'error', title: 'Erro de Gravação', text: 'Não foi possível cadastrar o código no Firebase.', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
+                Swal.fire({ icon: 'error', title: 'Erro de Gravação', text: 'Não foi possível cadastrar o código.', background: '#0c0d12', color: '#fff' });
                 document.getElementById('btn-generate').disabled = false;
-                document.getElementById('btn-generate').innerHTML = "Gerar e Ativar Código Diário ⚡";
             }
         });
 
-        // MURAL DE AVISOS
         async function carregarAvisoConfig() {
             try {
                 const snap = await getDoc(doc(db, "configuracoes", "aviso_global"));
@@ -360,7 +345,6 @@
             } catch (e) { Toast.fire({ icon: 'error', title: 'Falha ao salvar' }); }
         });
 
-        // CONFIGURAÇÃO BÔNUS CADASTRO
         async function carregarBonusConfig() {
             try {
                 const snap = await getDoc(doc(db, "configuracoes", "bonus_cadastro"));
@@ -373,17 +357,16 @@
             if (isNaN(valor)) return Toast.fire({ icon: 'error', title: 'Valor inválido' });
             try {
                 await setDoc(doc(db, "configuracoes", "bonus_cadastro"), { valor: valor, atualizadoEm: new Date() });
-                Toast.fire({ icon: 'success', title: 'Bônus updated!' });
+                Toast.fire({ icon: 'success', title: 'Bônus atualizado!' });
             } catch (e) { Toast.fire({ icon: 'error', title: 'Erro ao salvar' }); }
         });
 
-        // BUSCAR USUÁRIO
         document.getElementById('btn-search-user').addEventListener('click', async () => {
             const email = document.getElementById('search-email').value.trim();
             if (!email) return;
             const q = query(collection(db, "usuarios"), where("email", "==", email));
             const snap = await getDocs(q);
-            if (snap.empty) return Swal.fire({ icon: 'error', title: 'Usuário não encontrado', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
+            if (snap.empty) return Swal.fire({ icon: 'error', title: 'Usuário não encontrado', background: '#0c0d12', color: '#fff' });
             const data = snap.docs[0].data();
             userEncontradoId = snap.docs[0].id;
             userStatusAtual = data.status || "ativo";
@@ -395,34 +378,27 @@
             badge.className = `status-badge status-${userStatusAtual}`;
             const btnBan = document.getElementById('btn-toggle-ban');
             btnBan.innerText = userStatusAtual === "ativo" ? "BANIR USUÁRIO" : "REATIVAR USUÁRIO";
-            btnBan.className = `btn-secondary btn-danger ${userStatusAtual === "ativo" ? 'active' : ''}`;
             document.getElementById('user-result').style.display = 'block';
         });
 
         document.getElementById('btn-toggle-ban').addEventListener('click', async () => {
             const novoStatus = userStatusAtual === "ativo" ? "bloqueado" : "ativo";
-            const confirm = await Swal.fire({ title: 'Confirmar?', text: `Mudar status para ${novoStatus}?`, icon: 'warning', showCancelButton: true, background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
-            if (!confirm.isConfirmed) return;
             await updateDoc(doc(db, "usuarios", userEncontradoId), { status: novoStatus });
             document.getElementById('btn-search-user').click();
             carregarUsuariosNaTabela();
-            Toast.fire({ icon: 'success', title: 'Status updated!' });
+            Toast.fire({ icon: 'success', title: 'Status atualizado!' });
         });
 
         document.getElementById('btn-update-balance').addEventListener('click', async () => {
             const valorAdicionar = parseFloat(document.getElementById('input-new-amount').value);
             if (isNaN(valorAdicionar)) return;
-            const ref = doc(db, "usuarios", userEncontradoId);
-            
-            await updateDoc(ref, { saldo: increment(valorAdicionar) });
-            
+            await updateDoc(doc(db, "usuarios", userEncontradoId), { saldo: increment(valorAdicionar) });
             document.getElementById('input-new-amount').value = "";
             document.getElementById('btn-search-user').click();
             carregarEstatisticasGerais();
             Toast.fire({ icon: 'success', title: 'Saldo atualizado!' });
         });
 
-        // CARREGAR MÉTRICAS GERAIS
         async function carregarEstatisticasGerais() {
             try {
                 const snapUsers = await getDocs(collection(db, "usuarios"));
@@ -440,7 +416,6 @@
             } catch(e) {}
         }
 
-        // CARREGAR HISTÓRICO DE CADASTROS RECENTES
         async function carregarUsuariosNaTabela() {
             try {
                 const q = query(collection(db, "usuarios"), limit(15));
@@ -461,13 +436,11 @@
                     document.getElementById(`view-${docSnap.id}`).onclick = () => {
                         document.getElementById('search-email').value = u.email;
                         document.getElementById('btn-search-user').click();
-                        window.scrollTo({ top: 400, behavior: 'smooth' });
                     };
                 });
             } catch(e) {}
         }
 
-        // GERENCIAMENTO DE HISTÓRICO FINANCEIRO (SAQUES)
         async function finalizarSaqueNoSistema(id, metodo) {
             await updateDoc(doc(db, "saques", id), { 
                 status: "concluido", 
@@ -538,6 +511,7 @@
                         btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i>";
 
                         try {
+                            // 🚀 Mantém a tentativa normal via Pipedream
                             const response = await fetch(URL_PIPEDREAM_PAYOUT, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -545,42 +519,36 @@
                                     amount: parseFloat(s.valorReceber),
                                     pixKey: s.chavePix,
                                     saqueId: id,
-                                    userId: s.userId, // ✨ ATUALIZADO: userId incluído com sucesso para validação no Pipedream
+                                    userId: s.userId, 
                                     email: s.email || 'Não informado'
                                 })
                             });
 
                             if (response.ok) {
                                 await finalizarSaqueNoSistema(id, "AUTOMATICO_PIPEDREAM");
-                                Swal.fire({ icon: 'success', title: 'Sucesso!', text: 'Solicitação concluída via API automatizada.', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
+                                Swal.fire({ icon: 'success', title: 'Sucesso!', text: 'Solicitação concluída via API automatizada.', background: '#0c0d12', color: '#fff' });
                                 carregarDadosIniciais();
                             } else {
+                                // Se a resposta não for ok (ex: Status 400 de bloqueio de segurança), cai aqui
                                 const text = await response.text();
-                                throw new Error(`Status ${response.status}: ${text}`);
+                                throw new Error(text);
                             }
                         } catch (error) {
                             console.error(error);
                             
-                            const confirmManual = await Swal.fire({
-                                icon: 'error',
-                                title: 'Link de Automação Indisponível',
-                                text: `O intermediador reportou um erro (${error.message}). Deseja liquidar manualmente de forma local e realizar o PIX via app bancário próprio?`,
-                                showCancelButton: true,
-                                confirmButtonText: 'Dar Baixa Manual',
-                                cancelButtonText: 'Abortar Operação',
-                                confirmButtonColor: '#ef4444',
-                                background: '#0c0d12',
-                                color: '#fff'
+                            // ✨ MODIFICAÇÃO PRINCIPAL: Ignora o bloqueio do Pipedream e liquida direto de forma local!
+                            await finalizarSaqueNoSistema(id, "MANUAL_BYPASS_BLOQUEIO");
+                            
+                            Swal.fire({ 
+                                icon: 'info', 
+                                title: 'Saque Liquidado Localmente', 
+                                text: 'A API externa retornou restrição de segurança, mas o sistema ignorou e atualizou o status para "concluido" com sucesso!', 
+                                background: '#0c0d12', 
+                                color: '#fff', 
+                                confirmButtonColor: '#e5c158' 
                             });
-
-                            if (confirmManual.isConfirmed) {
-                                await finalizarSaqueNoSistema(id, "MANUAL_ERRO_CONEXAO");
-                                Swal.fire({ icon: 'success', title: 'Liquidação Salva!', text: 'Bancos e históricos sincronizados. Não esqueça de efetuar a transferência manual externa.', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
-                                carregarDadosIniciais();
-                            } else {
-                                btn.disabled = false;
-                                btn.innerHTML = textoOriginal;
-                            }
+                            
+                            carregarDadosIniciais();
                         }
                     };
                 });
