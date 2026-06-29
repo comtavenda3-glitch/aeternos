@@ -449,11 +449,9 @@
                 codeElement.classList.add('animate__animated', 'animate__fadeIn');
                 
                 try {
-                    // 1. Busca todos os investimentos ATIVOS do sistema para cruzar os dados de quem comprou relógio
                     const invQuery = query(collection(db, "investimentos"), where("status", "==", "ativo"));
                     const invSnapshot = await getDocs(invQuery);
                     
-                    // Cria um Set contendo os UIDs únicos dos usuários que possuem investimento ativo
                     const usersComInvestimentoAtivo = new Set();
                     invSnapshot.forEach(docInv => {
                         const invData = docInv.data();
@@ -462,7 +460,6 @@
                         }
                     });
 
-                    // 2. Busca a lista de usuários da rede
                     const usuariosRef = collection(db, "usuarios");
                     const querySnapshot = await getDocs(usuariosRef);
                     
@@ -474,7 +471,6 @@
                         const uData = docSnap.data();
                         const idDoUsuario = docSnap.id;
                         
-                        // NOVA REGRA DE ATIVO: O UID do usuário precisa estar no Set de investimentos ativos
                         const usuarioDeFatoAtivo = usersComInvestimentoAtivo.has(idDoUsuario);
                         
                         if (uData.indicadoPor === user.uid) {
@@ -567,7 +563,7 @@
             executarCopia(link, 'btn-link', 'Link Copiado!');
         });
 
-        function ejecutarCopia(texto, btnId, msgSucesso) {
+        function executarCopia(texto, btnId, msgSucesso) {
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(texto).then(() => {
                     sucessoCopiaVisual(btnId, msgSucesso);
@@ -582,18 +578,28 @@
         function fallbackCopy(text, btnId, msgSucesso) {
             const textArea = document.createElement("textarea");
             textArea.value = text;
+            // Evita scrolling visual ao criar o elemento temporário
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
             document.body.appendChild(textArea);
+            textArea.focus();
             textArea.select();
             try {
-                document.execCommand('copy');
-                sucessoCopiaVisual(btnId, msgSucesso);
+                const bemSucedido = document.execCommand('copy');
+                if(bemSucedido) {
+                    sucessoCopiaVisual(btnId, msgSucesso);
+                } else {
+                    console.error('Falha ao copiar com execCommand');
+                }
             } catch (err) {
-                console.error('Erro ao copiar', err);
+                console.error('Erro ao executar fallback de cópia', err);
             }
             document.body.removeChild(textArea);
         }
 
-        function sucessoCopiaVisual(btnId, tituloAlerta) {
+        functionsucessoCopiaVisual(btnId, tituloAlerta) {
             const btn = document.getElementById(btnId);
             const iconOriginal = btn.innerHTML;
             
