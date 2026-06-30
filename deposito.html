@@ -446,7 +446,7 @@
             const valor = parseFloat(valorInput.value);
             const btn = document.getElementById('btn-gerar');
 
-            if (isNaN(valor) || valor < 1) {
+            if (isNaN(valor) || valor < 35) {
                 return Swal.fire({ icon: 'error', title: 'Valor Mínimo', text: 'O valor mínimo para depósito é de R$ 35,00', background: '#0c0d12', color: '#fff', confirmButtonColor: '#e5c158' });
             }
 
